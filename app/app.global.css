@@ -4,30 +4,20 @@
  */
 @import '~@fortawesome/fontawesome-free/css/all.css';
 
-body {
-  position: relative;
-  color: white;
-  height: 100vh;
-  background-color: #232c39;
-  background-image: linear-gradient(
-    45deg,
-    rgba(0, 216, 255, 0.5) 10%,
-    rgba(0, 1, 127, 0.7)
-  );
-  font-family: Arial, Helvetica, Helvetica Neue, serif;
-  overflow-y: hidden;
+* {
+  outline: none;
 }
 
-h2 {
-  margin: 0;
-  font-size: 2.25rem;
-  font-weight: bold;
-  letter-spacing: -0.025em;
-  color: #fff;
+body {
+  position: relative;
+  color: #333;
+  background-color: #ccc;
+  font-family: Arial, Helvetica, Helvetica Neue, serif;
+  font-size: 18px;
 }
 
 p {
-  font-size: 24px;
+  margin: 0;
 }
 
 li {
@@ -44,4 +34,29 @@ a:hover {
   opacity: 1;
   text-decoration: none;
   cursor: pointer;
+}
+
+button,
+input,
+textarea {
+  font-size: 16px;
+}
+
+button {
+  border: none;
+  padding: 10px;
+  text-align: center;
+  max-width: 150px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+button:hover {
+  background-color: #ccc;
+}
+
+input {
+  padding: 10px;
+  border-radius: 4px;
 }
