@@ -25,7 +25,10 @@ export interface RestaurantState {
 
 const INITIAL_STATE: RestaurantState = {} as RestaurantState;
 
-export default function restaurant(state = INITIAL_STATE, action: RestaurantActionTypes): RestaurantState {
+export default function restaurant(
+  state = INITIAL_STATE,
+  action: RestaurantActionTypes
+): RestaurantState {
   switch (action.type) {
     case SET_RESTAURANT: {
       return {
