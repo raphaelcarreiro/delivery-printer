@@ -1,17 +1,52 @@
-import axios from 'axios';
+import axios, { AxiosInstance, CancelTokenSource } from 'axios';
+import { history } from 'store';
 
-const apiOrders = axios.create({
-  baseURL: 'https://api2.topnfe.com.br/api/admin/orders/',
-  headers: {
-    key: '55ad99b84c3aaccd084b169df2893207',
-  },
-});
+// const baseURL = 'http://localhost:8000/api/admin/';
+const baseURL = 'https://api2.topnfe.com.br/api/admin/';
 
-const api = axios.create({
-  baseURL: 'https://api2.topnfe.com.br/api/client/',
-  headers: {
-    restaurantId: 1,
-  },
-});
+function getAxiosInstance(): AxiosInstance {
+  let instance: AxiosInstance;
+  let hastoken = false;
 
-export { apiOrders, api };
+  if (localStorage.getItem('token')) {
+    instance = axios.create({
+      baseURL,
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`,
+      },
+    });
+
+    hastoken = true;
+  } else
+    instance = axios.create({
+      baseURL,
+    });
+
+  if (hastoken)
+    instance.interceptors.response.use(
+      (response) => {
+        return response;
+      },
+      (error) => {
+        if (error.response) {
+          if (error.response.status === 401) {
+            localStorage.removeItem('token');
+            history.push('/login');
+            return;
+          }
+          return Promise.reject(error);
+        }
+        return Promise.reject(error);
+      }
+    );
+
+  return instance;
+}
+
+export function getCancelTokenSource(): CancelTokenSource {
+  const { CancelToken } = axios;
+  const source = CancelToken.source();
+  return source;
+}
+
+export { getAxiosInstance as api };

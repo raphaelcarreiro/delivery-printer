@@ -3,12 +3,16 @@ import { createHashHistory } from 'history';
 import { routerMiddleware } from 'connected-react-router';
 import { createLogger } from 'redux-logger';
 import { ThunkAction } from 'redux-thunk';
-// eslint-disable-next-line import/no-cycle
+import {
+  useSelector as useReduxSelector,
+  TypedUseSelectorHook,
+} from 'react-redux';
 import createRootReducer from './rootReducer';
 
 export const history = createHashHistory();
 const rootReducer = createRootReducer(history);
 export type RootState = ReturnType<typeof rootReducer>;
+export const useSelector: TypedUseSelectorHook<RootState> = useReduxSelector;
 
 const router = routerMiddleware(history);
 const middleware = [...getDefaultMiddleware(), router];

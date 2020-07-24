@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { remote } from 'electron';
 import { makeStyles } from '@material-ui/styles';
+import { OrderData, PrinterData } from 'components/home/Home';
+import { Typography } from '@material-ui/core';
 import Dialog from '../dialog/Dialog';
 import OrderProductComplements from './OrderProductComplements';
 
@@ -53,6 +55,7 @@ const useStyles = makeStyles({
   },
   title: {
     fontWeight: 600,
+    marginBottom: 10,
   },
   complementCategory: {
     display: 'grid',
@@ -63,179 +66,207 @@ const useStyles = makeStyles({
 
 interface PrintProps {
   handleClose(): void;
-  order: {
-    id: number;
-  };
+  order: OrderData;
 }
 
 const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
   const classes = useStyles();
-  const [printers, setPrinters] = useState([]);
+  const [printers, setPrinters] = useState<PrinterData[]>([]);
+  const [toPrint, setToPrint] = useState<PrinterData[]>([]);
+
+  // close if there is not printer in product
+  useEffect(() => {
+    const check = order.products.some((product) => product.printer);
+    if (!check) handleClose();
+  }, [handleClose, order]);
 
   useEffect(() => {
     if (order) {
-      let printers = [];
+      let productPrinters: PrinterData[] = [];
       order.products.forEach((product) => {
         if (product.printer) {
-          if (!printers.some((printer) => printer.id === product.printer.id))
-            printers.push(product.printer);
+          if (
+            !productPrinters.some(
+              (printer) => printer.id === product.printer.id
+            )
+          )
+            productPrinters.push(product.printer);
         }
       });
 
-      printers = printers.map((printer) => {
-        printer.order = {
+      productPrinters = productPrinters.map((_printer) => {
+        _printer.order = {
           ...order,
           products: order.products.filter((product) => {
-            return product.printer && product.printer.id === printer.id;
+            return product.printer && product.printer.id === _printer.id;
           }),
         };
-        return printer;
+        _printer.printed = false;
+        return _printer;
       });
 
-      setPrinters(printers);
+      setPrinters(productPrinters);
     }
   }, [order]);
 
   useEffect(() => {
     if (printers.length > 0) {
+      const tp = printers.find((p) => !p.printed);
+
+      // close if all order products had been printed
+      if (!tp) {
+        handleClose();
+        return;
+      }
+
+      setToPrint([tp]);
+    }
+  }, [printers, handleClose]);
+
+  useEffect(() => {
+    if (toPrint.length > 0) {
       const [win] = remote.BrowserWindow.getAllWindows();
+      const [printing] = toPrint;
 
       if (!win) return;
 
-      win.webContents.print(
-        {
-          color: false,
-          collate: false,
-          copies: 1,
-          silent: true,
-          margins: {
-            marginType: 'none',
+      try {
+        win.webContents.print(
+          {
+            deviceName: printing.name,
+            color: false,
+            collate: false,
+            copies: 1,
+            silent: true,
+            margins: {
+              marginType: 'none',
+            },
           },
-        },
-        (success, failureReason) => {
-          if (!success) console.log(failureReason);
+          (success, failureReason) => {
+            if (!success) console.log(failureReason);
+          }
+        );
+      } catch (err) {
+        console.log(err);
+        handleClose();
+      }
 
-          handleClose();
-        }
+      setPrinters((oldPrinters) =>
+        oldPrinters.map((p) => {
+          if (p.id === printing.id) p.printed = true;
+          return p;
+        })
       );
     }
-  }, [printers]);
+  }, [toPrint, handleClose]);
 
   return (
-    <>
-      <Dialog>
-        {printers.length > 0 &&
-          printers.map((printer) => (
-            <div className={classes.container} key={printer.id}>
-              <p className={classes.title}>
-                PEDIDO
-                {order.formattedId}
-              </p>
-              <p>{order.customer.name}</p>
-              <p>{order.formattedDate}</p>
-              {order.shipment.shipment_method === 'customer_collect' &&
-              !order.shipment.scheduled_at ? (
-                <span>**Cliente retira**</span>
-              ) : (
-                order.shipment.scheduled_at && (
-                  <span>
-                    **Cliente retira ás {order.shipment.formattedScheduledAt}
-                    **
-                  </span>
-                )
-              )}
-              <table className={classes.headerProducts}>
+    <Dialog>
+      {toPrint.length > 0 &&
+        toPrint.map((printer) => (
+          <div className={classes.container} key={printer.id}>
+            <Typography variant="h6" className={classes.title} gutterBottom>
+              PEDIDO {order.formattedId}
+            </Typography>
+            <Typography>{order.customer.name}</Typography>
+            <Typography>{order.formattedDate}</Typography>
+            {order.shipment.shipment_method === 'customer_collect' &&
+            !order.shipment.scheduled_at ? (
+              <Typography>**Cliente retira**</Typography>
+            ) : (
+              order.shipment.scheduled_at && (
+                <Typography>
+                  **Cliente retira ás {order.shipment.formattedScheduledAt}**
+                </Typography>
+              )
+            )}
+            <table className={classes.headerProducts}>
+              <tbody>
+                <tr>
+                  <td style={{ minWidth: 30 }}>
+                    <Typography>Qtd</Typography>
+                  </td>
+                  <td>
+                    <Typography>Item</Typography>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div className={classes.products}>
+              <table>
                 <tbody>
-                  <tr>
-                    <td style={{ minWidth: 30 }}>
-                      <span>Qtd</span>
-                    </td>
-                    <td>
-                      <span>Item</span>
-                    </td>
-                  </tr>
+                  {order.products.map((product) => (
+                    <tr key={product.id}>
+                      <td className={classes.productAmount}>
+                        <Typography>{product.amount}x</Typography>
+                      </td>
+                      <td className={classes.product}>
+                        <Typography className={classes.productName}>
+                          {product.name}
+                        </Typography>
+                        {product.annotation && (
+                          <Typography variant="body2">
+                            Obs: {product.annotation}
+                          </Typography>
+                        )}
+                        {product.additional.length > 0 && (
+                          <>
+                            {product.additional.map((additional) => (
+                              <Typography
+                                display="inline"
+                                variant="body2"
+                                className={classes.additional}
+                                key={additional.id}
+                              >
+                                c/ {additional.name}
+                              </Typography>
+                            ))}
+                          </>
+                        )}
+                        {product.ingredients.length > 0 && (
+                          <>
+                            {product.ingredients.map((ingredient) => (
+                              <Typography
+                                display="inline"
+                                variant="body2"
+                                className={classes.ingredient}
+                                key={ingredient.id}
+                              >
+                                s/ {ingredient.name}
+                              </Typography>
+                            ))}
+                          </>
+                        )}
+                        {product.complement_categories.length > 0 && (
+                          <>
+                            {product.complement_categories.map((category) => (
+                              <>
+                                {category.complements.length > 0 && (
+                                  <div
+                                    key={category.id}
+                                    className={classes.complementCategory}
+                                  >
+                                    <Typography variant="body2">
+                                      {category.name}
+                                    </Typography>
+                                    <OrderProductComplements
+                                      category={category}
+                                    />
+                                  </div>
+                                )}
+                              </>
+                            ))}
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
-              <div className={classes.products}>
-                <table>
-                  <tbody>
-                    {printer.order.products.map((product) => (
-                      <tr key={product.id}>
-                        <td className={classes.productAmount}>
-                          <span>{product.amount}x</span>
-                        </td>
-                        <td className={classes.product}>
-                          <span className={classes.productName}>
-                            {product.name}
-                          </span>
-                          {product.annotation && (
-                            <span variant="body2">
-                              Obs:
-                              {product.annotation}
-                            </span>
-                          )}
-                          {product.additional.length > 0 && (
-                            <>
-                              {product.additional.map((additional) => (
-                                <span
-                                  display="inline"
-                                  variant="body2"
-                                  className={classes.additional}
-                                  key={additional.id}
-                                >
-                                  c/ {additional.name}
-                                </span>
-                              ))}
-                            </>
-                          )}
-                          {product.ingredients.length > 0 && (
-                            <>
-                              {product.ingredients.map((ingredient) => (
-                                <span
-                                  display="inline"
-                                  variant="body2"
-                                  className={classes.ingredient}
-                                  key={ingredient.id}
-                                >
-                                  s/ {ingredient.name}
-                                </span>
-                              ))}
-                            </>
-                          )}
-                          {product.complement_categories.length > 0 && (
-                            <>
-                              {product.complement_categories.map((category) => (
-                                <>
-                                  {category.complements.length > 0 && (
-                                    <div
-                                      key={category.id}
-                                      className={classes.complementCategory}
-                                    >
-                                      <span variant="body2">
-                                        {category.name}
-                                      </span>
-                                      <OrderProductComplements
-                                        category={category}
-                                      />
-                                    </div>
-                                  )}
-                                </>
-                              ))}
-                            </>
-                          )}
-                        </td>
-                        <td>
-                          <span>{product.formattedFinalPrice}</span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
             </div>
-          ))}
-      </Dialog>
-    </>
+          </div>
+        ))}
+    </Dialog>
   );
 };
 

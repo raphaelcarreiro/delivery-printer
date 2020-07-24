@@ -55,8 +55,8 @@ const createWindow = async () => {
 
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1024,
-    height: 728,
+    width: 600,
+    height: 600,
     webPreferences:
       (process.env.NODE_ENV === 'development' ||
         process.env.E2E_BUILD === 'true') &&
@@ -68,6 +68,8 @@ const createWindow = async () => {
             preload: path.join(__dirname, 'dist/renderer.prod.js'),
           },
   });
+
+  mainWindow.setMenuBarVisibility(false);
 
   mainWindow.loadURL(`file://${__dirname}/app.html`);
 

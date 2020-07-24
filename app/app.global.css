@@ -1,62 +1,120 @@
-/*
- * @NOTE: Prepend a `~` to css file paths that are in your node_modules
- *        See https://github.com/webpack-contrib/sass-loader#imports
- */
-@import '~@fortawesome/fontawesome-free/css/all.css';
-
 * {
-  outline: none;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  position: relative;
-  color: #333;
-  background-color: #ccc;
-  font-family: Arial, Helvetica, Helvetica Neue, serif;
-  font-size: 18px;
+  background-color: #fafafa;
+  color: #212529;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+    'Segoe UI Symbol';
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+form {
+  width: 100%;
+}
+
+a,
+a:hover {
+  text-decoration: none;
 }
 
 p {
   margin: 0;
 }
 
-li {
-  list-style: none;
+@keyframes zoom {
+  from {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
-a {
-  color: white;
-  opacity: 0.75;
-  text-decoration: none;
+.zoom-animation {
+  animation-name: zoom;
+  animation-duration: 0.3s;
+  animation-iteration-count: 1;
+  animation-timing-function: cubic-bezier(0.1, 0.82, 0.25, 1);
 }
 
-a:hover {
-  opacity: 1;
-  text-decoration: none;
-  cursor: pointer;
+@keyframes placeHolderShimmer {
+  0% {
+    background-position: -468px 0;
+  }
+  100% {
+    background-position: 468px 0;
+  }
 }
 
-button,
-input,
-textarea {
-  font-size: 16px;
+.animated-background {
+  animation-duration: 1s;
+  animation-fill-mode: forwards;
+  animation-iteration-count: infinite;
+  animation-name: placeHolderShimmer;
+  animation-timing-function: linear;
+  background: #f6f7f8;
+  background: linear-gradient(to right, #eeeeee 8%, #dddddd 18%, #eeeeee 33%);
+  background-size: 800px 104px;
+  position: relative;
 }
 
-button {
-  border: none;
-  padding: 10px;
-  text-align: center;
-  max-width: 150px;
+@media (min-width: 1200px) {
+  /* width */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 10px;
+  }
+
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: #c6c6c6;
+    border-radius: 10px;
+  }
+
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #c6c6c6;
+  }
+}
+
+.list-item {
+  display: block;
+  margin-bottom: 5px;
+  background-color: #fff;
+  box-shadow: 1px 1px 9px 1px #eee;
   border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s;
 }
 
-button:hover {
-  background-color: #ccc;
-}
-
-input {
-  padding: 10px;
-  border-radius: 4px;
+.list-item-main-text {
+  margin-bottom: 5px;
+  max-width: 93%;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
