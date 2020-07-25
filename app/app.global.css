@@ -51,6 +51,19 @@ p {
   }
 }
 
+@page {
+  size: 80mm;
+  margin: 0;
+}
+
+@media print {
+  body,
+  html {
+    max-width: 80mm;
+    min-height: 200mm;
+  }
+}
+
 .zoom-animation {
   animation-name: zoom;
   animation-duration: 0.3s;
@@ -74,7 +87,7 @@ p {
   animation-name: placeHolderShimmer;
   animation-timing-function: linear;
   background: #f6f7f8;
-  background: linear-gradient(to right, #eeeeee 8%, #dddddd 18%, #eeeeee 33%);
+  background: linear-gradient(to right, #eee 8%, #ddd 18%, #eee 33%);
   background-size: 800px 104px;
   position: relative;
 }
@@ -101,20 +114,4 @@ p {
   ::-webkit-scrollbar-thumb:hover {
     background: #c6c6c6;
   }
-}
-
-.list-item {
-  display: block;
-  margin-bottom: 5px;
-  background-color: #fff;
-  box-shadow: 1px 1px 9px 1px #eee;
-  border-radius: 4px;
-}
-
-.list-item-main-text {
-  margin-bottom: 5px;
-  max-width: 93%;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  overflow: hidden;
 }

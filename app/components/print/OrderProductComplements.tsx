@@ -1,5 +1,7 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/styles';
+import { Typography } from '@material-ui/core';
+import { ComplementCategory } from '../home/Home';
 
 const useStyles = makeStyles({
   ingredient: {
@@ -12,12 +14,18 @@ const useStyles = makeStyles({
   },
 });
 
-const OrderProductComplements: React.FC = ({ category }) => {
+interface OrderProductComplementProps {
+  complementCategory: ComplementCategory;
+}
+
+const OrderProductComplements: React.FC<OrderProductComplementProps> = ({
+  complementCategory,
+}) => {
   const classes = useStyles();
 
   return (
     <div>
-      {category.complements.map((complement, index) => (
+      {complementCategory.complements.map((complement, index) => (
         <div
           key={complement.id}
           style={
@@ -29,28 +37,28 @@ const OrderProductComplements: React.FC = ({ category }) => {
         >
           <span className={classes.complementName} key={complement.id}>
             {complement.name}
-            {index !== category.complements.length - 1 && ', '}
+            {index !== complementCategory.complements.length - 1 && ', '}
           </span>
           <div>
             {complement.additional.map((additional) => (
-              <span
+              <Typography
                 display="inline"
                 variant="caption"
                 className={classes.ingredient}
                 key={additional.id}
               >
                 c/ {additional.name}
-              </span>
+              </Typography>
             ))}
             {complement.ingredients.map((ingredient) => (
-              <span
+              <Typography
                 display="inline"
                 variant="caption"
                 className={classes.ingredient}
                 key={ingredient.id}
               >
                 s/ {ingredient.name}
-              </span>
+              </Typography>
             ))}
           </div>
         </div>

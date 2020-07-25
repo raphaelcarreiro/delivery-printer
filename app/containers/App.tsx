@@ -20,8 +20,8 @@ export const AppContext = React.createContext<AppContextData>(
   {} as AppContextData
 );
 
-// const baseUrl = 'http://localhost:3333/admin';
-const baseUrl = 'https://api-node.topnfe.com.br/admin';
+const baseUrl = 'http://localhost:3333/admin';
+// const baseUrl = 'https://api-node.topnfe.com.br/admin';
 const socket: SocketIOClient.Socket = io.connect(baseUrl);
 
 export function useApp(): AppContextData {

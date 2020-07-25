@@ -20,6 +20,32 @@ export interface PrinterData {
   printed?: boolean;
 }
 
+interface Additional {
+  id: number;
+  name: string;
+}
+
+interface Ingredient {
+  id: number;
+  name: string;
+}
+
+export interface ComplementCategory {
+  id: number;
+  name: string;
+  complements: Complement[];
+}
+
+interface Complement {
+  id: number;
+  name: string;
+  additional: ComplementAdditional[];
+  ingredients: ComplementIngredient[];
+}
+
+type ComplementAdditional = Additional;
+type ComplementIngredient = Ingredient;
+
 interface Product {
   id: number;
   name: string;
@@ -30,6 +56,9 @@ interface Product {
   printer: PrinterData;
   amount: number;
   annotation: string;
+  additional: Additional[];
+  ingredients: Ingredient[];
+  complement_categories: ComplementCategory[];
 }
 
 interface Shipment {

@@ -195,7 +195,7 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
             <div className={classes.products}>
               <table>
                 <tbody>
-                  {order.products.map((product) => (
+                  {printer.order.products.map((product) => (
                     <tr key={product.id}>
                       <td className={classes.productAmount}>
                         <Typography>{product.amount}x</Typography>
@@ -250,7 +250,7 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
                                       {category.name}
                                     </Typography>
                                     <OrderProductComplements
-                                      category={category}
+                                      complementCategory={category}
                                     />
                                   </div>
                                 )}

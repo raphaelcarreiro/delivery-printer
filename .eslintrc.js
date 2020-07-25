@@ -1,7 +1,8 @@
 module.exports = {
-  extends: 'erb/typescript',
+  extends: ['erb/typescript', 'prettier', 'plugin:prettier/recommended'],
   rules: {
     // A temporary hack related to IDE not resolving correct package.json
+    'prettier/prettier': 'error',
     'import/no-extraneous-dependencies': 'off',
     'import/prefer-default-export': 'off',
     'react/prop-types': 'off',
@@ -25,9 +26,9 @@ module.exports = {
     tsconfigRootDir: __dirname,
     createDefaultProgram: true,
   },
+  plugins: ['prettier'],
   settings: {
     'import/resolver': {
-      // See https://github.com/benmosher/eslint-plugin-import/issues/1396#issuecomment-575727774 for line below
       node: {},
       webpack: {
         config: require.resolve('./configs/webpack.config.eslint.js'),

@@ -1,8 +1,8 @@
 import axios, { AxiosInstance, CancelTokenSource } from 'axios';
 import { history } from 'store';
 
-// const baseURL = 'http://localhost:8000/api/admin/';
-const baseURL = 'https://api2.topnfe.com.br/api/admin/';
+const baseURL = 'http://localhost:8000/api/admin/';
+// const baseURL = 'https://api2.topnfe.com.br/api/admin/';
 
 function getAxiosInstance(): AxiosInstance {
   let instance: AxiosInstance;

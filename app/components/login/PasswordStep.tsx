@@ -70,7 +70,6 @@ const PasswordStep: React.FC<PasswordStepProps> = ({
         onChange={handleChange}
         name="password"
         type={showPassword ? 'text' : 'password'}
-        autoFocus
         required
         disabled={loading}
         autoComplete="current-password"
@@ -84,6 +83,7 @@ const PasswordStep: React.FC<PasswordStepProps> = ({
           ),
           classes: { root: classes.input },
         }}
+        autoFocus
       />
       <input
         type="hidden"
