@@ -51,16 +51,10 @@ p {
   }
 }
 
-@page {
-  size: 80mm;
-  margin: 0;
-}
-
 @media print {
-  body,
-  html {
-    max-width: 80mm;
-    min-height: 200mm;
+  @page {
+    margin: 0;
+    size: 80mm auto;
   }
 }
 

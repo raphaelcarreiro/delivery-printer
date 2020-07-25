@@ -52,7 +52,7 @@
     ]
   },
   "build": {
-    "productName": "ElectronReact",
+    "productName": "Delivery Printer",
     "appId": "org.develar.ElectronReact",
     "files": [
       "dist/",
@@ -96,9 +96,9 @@
     },
     "publish": {
       "provider": "github",
-      "owner": "electron-react-boilerplate",
-      "repo": "electron-react-boilerplate",
-      "private": false
+      "owner": "raphaelcarreiro",
+      "repo": "delivery-printer",
+      "private": true
     }
   },
   "repository": {

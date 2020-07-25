@@ -3,7 +3,7 @@ import { remote } from 'electron';
 import { makeStyles } from '@material-ui/styles';
 import { OrderData, PrinterData } from 'components/home/Home';
 import { Typography } from '@material-ui/core';
-import Dialog from '../dialog/Dialog';
+import { api } from 'services/api';
 import OrderProductComplements from './OrderProductComplements';
 
 const useStyles = makeStyles({
@@ -130,6 +130,8 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
 
       if (!win) return;
 
+      let error = false;
+
       try {
         win.webContents.print(
           {
@@ -142,26 +144,76 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
               marginType: 'none',
             },
           },
-          (success, failureReason) => {
-            if (!success) console.log(failureReason);
+          (success) => {
+            if (success) {
+              setPrinters((oldPrinters) =>
+                oldPrinters.map((p) => {
+                  if (p.id === printing.id) p.printed = true;
+                  return p;
+                })
+              );
+              api()
+                .post('/orders/printed', { order_id: printing.order.id })
+                .then(() => {
+                  console.log(
+                    `Alterado situação do pedido ${printing.order.id}`
+                  );
+                })
+                .catch((err) => {
+                  console.log(err);
+                });
+            }
           }
         );
       } catch (err) {
         console.log(err);
-        handleClose();
+        error = true;
       }
 
-      setPrinters((oldPrinters) =>
-        oldPrinters.map((p) => {
-          if (p.id === printing.id) p.printed = true;
-          return p;
-        })
-      );
+      // try to print in default printer
+      if (error) {
+        try {
+          win.webContents.print(
+            {
+              color: false,
+              collate: false,
+              copies: 1,
+              silent: true,
+              margins: {
+                marginType: 'none',
+              },
+            },
+            (success) => {
+              if (success) {
+                setPrinters((oldPrinters) =>
+                  oldPrinters.map((p) => {
+                    if (p.id === printing.id) p.printed = true;
+                    return p;
+                  })
+                );
+                api()
+                  .post('/orders/printed', { order_id: printing.order.id })
+                  .then(() => {
+                    console.log(
+                      `Alterado situação do pedido ${printing.order.id}`
+                    );
+                  })
+                  .catch((err) => {
+                    console.log(err);
+                  });
+              }
+            }
+          );
+        } catch (err) {
+          console.log(err);
+          handleClose();
+        }
+      }
     }
   }, [toPrint, handleClose]);
 
   return (
-    <Dialog>
+    <>
       {toPrint.length > 0 &&
         toPrint.map((printer) => (
           <div className={classes.container} key={printer.id}>
@@ -266,7 +318,7 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
             </div>
           </div>
         ))}
-    </Dialog>
+    </>
   );
 };
 

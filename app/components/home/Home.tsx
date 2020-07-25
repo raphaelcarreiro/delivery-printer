@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   formatRelative,
   parseISO,
@@ -10,6 +10,7 @@ import { useSelector } from 'store';
 import { Typography } from '@material-ui/core';
 import { useApp } from 'containers/App';
 import InsideLoading from 'components/loading/InsideLoading';
+import io from 'socket.io-client';
 import Print from '../print/Print';
 import { moneyFormat } from '../../helpers/NumberFormat';
 
@@ -94,53 +95,63 @@ export interface OrderData {
   customer: Customer;
 }
 
+const baseUrl = 'http://localhost:3333/admin';
+// const baseUrl = 'https://api-node.topnfe.com.br/admin';
+
 export default function Home(): JSX.Element {
   const [order, setOrder] = useState<OrderData | null>(null);
   const restaurant = useSelector((state) => state.restaurant);
   const user = useSelector((state) => state.user);
-  const { socket, loading } = useApp();
+  const { loading } = useApp();
+  const socket = useMemo(() => io.connect(baseUrl), []);
 
   function formatId(id: number) {
     return `#${`00000${id}`.slice(-6)}`;
   }
 
   useEffect(() => {
-    socket.on('stored', (_order: OrderData) => {
-      const date = parseISO(_order.created_at);
-      const orderReceived: OrderData = {
-        ..._order,
-        formattedId: formatId(_order.id),
-        formattedTotal: moneyFormat(_order.total),
-        formattedChange: moneyFormat(_order.change - _order.total),
-        formattedDate: formatRelative(date, new Date(), { locale: ptbr }),
-        formattedSubtotal: moneyFormat(_order.subtotal),
-        formattedDiscount: moneyFormat(_order.discount),
-        formattedTax: moneyFormat(_order.tax),
-        dateDistance: formatDistanceStrict(date, new Date(), {
-          locale: ptbr,
-          roundingMethod: 'ceil',
-        }),
-        products: _order.products.map((product) => {
-          product.formattedFinalPrice = moneyFormat(product.final_price);
-          product.formattedPrice = moneyFormat(product.price);
-          return product;
-        }),
-        shipment: {
-          ..._order.shipment,
-          formattedScheduledAt: _order.shipment.scheduled_at
-            ? format(parseISO(_order.shipment.scheduled_at), 'HH:mm')
-            : null,
-        },
-      };
-      setOrder(orderReceived);
-    });
+    if (restaurant.id) {
+      if (socket.disconnected) socket.connect();
+      socket.emit('register', restaurant.id);
+      console.log(socket.connected);
+      console.log('Conectado ao socket');
 
-    return () => {
-      if (socket) {
-        socket.off('stored');
-      }
-    };
-  }, [socket]);
+      socket.on('reconnect', () => {
+        socket.emit('register', restaurant.id);
+        console.log('Reconectado ao socket');
+      });
+
+      socket.on('stored', (_order: OrderData) => {
+        const date = parseISO(_order.created_at);
+        const orderReceived: OrderData = {
+          ..._order,
+          formattedId: formatId(_order.id),
+          formattedTotal: moneyFormat(_order.total),
+          formattedChange: moneyFormat(_order.change - _order.total),
+          formattedDate: formatRelative(date, new Date(), { locale: ptbr }),
+          formattedSubtotal: moneyFormat(_order.subtotal),
+          formattedDiscount: moneyFormat(_order.discount),
+          formattedTax: moneyFormat(_order.tax),
+          dateDistance: formatDistanceStrict(date, new Date(), {
+            locale: ptbr,
+            roundingMethod: 'ceil',
+          }),
+          products: _order.products.map((product) => {
+            product.formattedFinalPrice = moneyFormat(product.final_price);
+            product.formattedPrice = moneyFormat(product.price);
+            return product;
+          }),
+          shipment: {
+            ..._order.shipment,
+            formattedScheduledAt: _order.shipment.scheduled_at
+              ? format(parseISO(_order.shipment.scheduled_at), 'HH:mm')
+              : null,
+          },
+        };
+        setOrder(orderReceived);
+      });
+    }
+  }, [restaurant, socket]);
 
   const handleClose = useCallback(() => {
     setOrder(null);
@@ -148,16 +159,21 @@ export default function Home(): JSX.Element {
 
   return (
     <>
-      {order && <Print handleClose={handleClose} order={order} />}
       {loading ? (
         <InsideLoading />
       ) : (
-        <div>
-          <Typography variant="h5">{restaurant.name}</Typography>
-          <Typography variant="body2" color="textSecondary">
-            Olá {user.name}
-          </Typography>
-        </div>
+        <>
+          {order ? (
+            <Print handleClose={handleClose} order={order} />
+          ) : (
+            <div>
+              <Typography variant="h5">{restaurant.name}</Typography>
+              <Typography variant="body2" color="textSecondary">
+                Olá {user.name}
+              </Typography>
+            </div>
+          )}
+        </>
       )}
     </>
   );
