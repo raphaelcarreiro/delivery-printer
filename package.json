@@ -101,6 +101,10 @@
       "private": false
     }
   },
+  "author": {
+    "name": "Raphael M Carreiro",
+    "email": "raphaelcarreiro@hotmail.com"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/electron-react-boilerplate/electron-react-boilerplate/issues"

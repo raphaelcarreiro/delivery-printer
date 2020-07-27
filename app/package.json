@@ -2,8 +2,12 @@
   "name": "delivery-printer",
   "productName": "delivery-printer",
   "version": "1.2.1",
-  "description": "Aplicação para impressão automática de pedidos",
+  "description": "Delivery printer",
   "main": "./main.prod.js",
+  "author": {
+    "name": "Raphael M Carreiro",
+    "email": "raphaelcarreiro@hotmail.com"
+  },
   "scripts": {
     "electron-rebuild": "node -r ../internals/scripts/BabelRegister.js ../internals/scripts/ElectronRebuild.js",
     "postinstall": "yarn electron-rebuild"
