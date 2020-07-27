@@ -53,7 +53,7 @@
   },
   "build": {
     "productName": "Delivery Printer",
-    "appId": "org.develar.ElectronReact",
+    "appId": "com.topnfe.delivery",
     "files": [
       "dist/",
       "node_modules/",
@@ -98,7 +98,7 @@
       "provider": "github",
       "owner": "raphaelcarreiro",
       "repo": "delivery-printer",
-      "private": true
+      "private": false
     }
   },
   "repository": {
