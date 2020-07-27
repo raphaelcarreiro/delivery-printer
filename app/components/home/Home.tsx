@@ -14,8 +14,12 @@ import io from 'socket.io-client';
 import RestaurantStatus from 'components/restaurant-status/RestaurantStatus';
 import { makeStyles } from '@material-ui/core/styles';
 import { useAuth } from 'hooks/auth';
+import constants from 'constants/url';
+import { useDispatch } from 'react-redux';
+import { setRestaurantIsOpen } from 'store/modules/restaurant/actions';
 import Print from '../print/Print';
 import { moneyFormat } from '../../helpers/NumberFormat';
+import { OrderData } from './types';
 
 const useStyles = makeStyles({
   container: {
@@ -27,99 +31,16 @@ const useStyles = makeStyles({
   },
 });
 
-export interface PrinterData {
-  id: number;
-  name: string;
-  order: OrderData;
-  printed?: boolean;
-}
-
-interface Additional {
-  id: number;
-  name: string;
-}
-
-interface Ingredient {
-  id: number;
-  name: string;
-}
-
-export interface ComplementCategory {
-  id: number;
-  name: string;
-  complements: Complement[];
-}
-
-interface Complement {
-  id: number;
-  name: string;
-  additional: ComplementAdditional[];
-  ingredients: ComplementIngredient[];
-}
-
-type ComplementAdditional = Additional;
-type ComplementIngredient = Ingredient;
-
-interface Product {
-  id: number;
-  name: string;
-  final_price: number;
-  price: number;
-  formattedFinalPrice: string;
-  formattedPrice: string;
-  printer: PrinterData;
-  amount: number;
-  annotation: string;
-  additional: Additional[];
-  ingredients: Ingredient[];
-  complement_categories: ComplementCategory[];
-}
-
-interface Shipment {
-  id: number;
-  address: string;
-  formattedScheduledAt: string | null;
-  scheduled_at: string | null;
-  shipment_method: string;
-}
-
-interface Customer {
-  name: string;
-}
-
-export interface OrderData {
-  id: number;
-  formattedId: string;
-  formattedTotal: string;
-  formattedChange: string;
-  formattedDate: string;
-  formattedSubtotal: string;
-  formattedDiscount: string;
-  formattedTax: string;
-  dateDistance: string;
-  total: number;
-  change: number;
-  subtotal: number;
-  discount: number;
-  tax: number;
-  created_at: string;
-  products: Product[];
-  shipment: Shipment;
-  customer: Customer;
-}
-
-const baseUrl = 'http://localhost:3333/admin';
-// const baseUrl = 'https://api-node.topnfe.com.br/admin';
-
 export default function Home(): JSX.Element {
   const [order, setOrder] = useState<OrderData | null>(null);
   const restaurant = useSelector((state) => state.restaurant);
   const user = useSelector((state) => state.user);
   const { loading } = useApp();
-  const socket = useMemo(() => io.connect(baseUrl), []);
+  const socket = useMemo(() => io.connect(constants.WS_BASE_URL), []);
   const [wsConnected, setWsConnected] = useState(false);
   const classes = useStyles();
   const auth = useAuth();
+  const dispatch = useDispatch();
 
   function formatId(id: number) {
     return `#${`00000${id}`.slice(-6)}`;
@@ -138,6 +59,10 @@ export default function Home(): JSX.Element {
 
       socket.on('reconnect', () => {
         socket.emit('register', restaurant.id);
+      });
+
+      socket.on('handleRestaurantState', (response: { isOpen: boolean }) => {
+        dispatch(setRestaurantIsOpen(response.isOpen));
       });
 
       socket.on('stored', (_order: OrderData) => {
@@ -174,7 +99,7 @@ export default function Home(): JSX.Element {
     return () => {
       clearInterval(timer);
     };
-  }, [restaurant, socket]);
+  }, [restaurant, socket, dispatch]);
 
   const handleClose = useCallback(() => {
     setOrder(null);

@@ -1,8 +1,6 @@
 import axios, { AxiosInstance, CancelTokenSource } from 'axios';
 import { history } from 'store';
-
-const baseURL = 'http://localhost:8000/api/admin/';
-// const baseURL = 'https://api2.topnfe.com.br/api/admin/';
+import constants from 'constants/url';
 
 function getAxiosInstance(): AxiosInstance {
   let instance: AxiosInstance;
@@ -10,7 +8,7 @@ function getAxiosInstance(): AxiosInstance {
 
   if (localStorage.getItem('token')) {
     instance = axios.create({
-      baseURL,
+      baseURL: constants.BASE_URL,
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`,
       },
@@ -19,7 +17,7 @@ function getAxiosInstance(): AxiosInstance {
     hastoken = true;
   } else
     instance = axios.create({
-      baseURL,
+      baseURL: constants.BASE_URL,
     });
 
   if (hastoken)

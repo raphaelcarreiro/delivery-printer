@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Fragment } from 'react';
 import { remote } from 'electron';
 import { makeStyles } from '@material-ui/styles';
-import { OrderData, PrinterData } from 'components/home/Home';
+import { OrderData, PrinterData } from 'components/home/types';
 import { Typography } from '@material-ui/core';
 import { api } from 'services/api';
-import OrderProductComplements from './OrderProductComplements';
+import Complements from './Complements';
 
 const useStyles = makeStyles({
   container: {
@@ -292,21 +292,18 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
                         {product.complement_categories.length > 0 && (
                           <>
                             {product.complement_categories.map((category) => (
-                              <>
+                              <Fragment key={category.id}>
                                 {category.complements.length > 0 && (
-                                  <div
-                                    key={category.id}
-                                    className={classes.complementCategory}
-                                  >
+                                  <div className={classes.complementCategory}>
                                     <Typography variant="body2">
                                       {category.name}
                                     </Typography>
-                                    <OrderProductComplements
+                                    <Complements
                                       complementCategory={category}
                                     />
                                   </div>
                                 )}
-                              </>
+                              </Fragment>
                             ))}
                           </>
                         )}

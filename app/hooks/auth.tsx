@@ -5,6 +5,7 @@ import { setUser } from 'store/modules/user/actions';
 import { api } from 'services/api';
 import jwt from 'jsonwebtoken';
 import { RestaurantState } from 'store/modules/restaurant/reducer';
+import constants from 'constants/url';
 
 type AuthenticatedData = {
   data: string | null | object; // eslint-disable-line
@@ -86,8 +87,7 @@ const AuthProvider: React.FC = ({ children }) => {
     let authenticated = false;
 
     const token = localStorage.getItem('token');
-    const secret: jwt.Secret =
-      'KkAUmBJBpKLI6SMjSYSX8vqkwehE6H5a0D6mfnJiIq3UdRvkxwvtsC0cnmZpgG9Y';
+    const secret: jwt.Secret = constants.TOKEN;
 
     if (token) {
       try {
@@ -111,8 +111,7 @@ const AuthProvider: React.FC = ({ children }) => {
     };
 
     const token = localStorage.getItem('token');
-    const secret: jwt.Secret =
-      'KkAUmBJBpKLI6SMjSYSX8vqkwehE6H5a0D6mfnJiIq3UdRvkxwvtsC0cnmZpgG9Y';
+    const secret: jwt.Secret = constants.TOKEN;
 
     if (token) {
       try {
