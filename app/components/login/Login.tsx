@@ -121,7 +121,7 @@ const Login: React.FC = () => {
   return (
     <>
       <div className={classes.container}>
-        <Grid item xs={12} sm={8} md={6} lg={4} xl={3}>
+        <Grid item xs={12} sm={8} md={6} lg={3} xl={3}>
           <div className={classes.paper}>
             {loading && (
               <div className={classes.loadingWrap}>

@@ -6,13 +6,26 @@ import {
   format,
 } from 'date-fns';
 import ptbr from 'date-fns/locale/pt-BR';
-import { useSelector } from 'store';
-import { Typography } from '@material-ui/core';
+import { useSelector, history } from 'store';
+import { Typography, Button } from '@material-ui/core';
 import { useApp } from 'containers/App';
 import InsideLoading from 'components/loading/InsideLoading';
 import io from 'socket.io-client';
+import RestaurantStatus from 'components/restaurant-status/RestaurantStatus';
+import { makeStyles } from '@material-ui/core/styles';
+import { useAuth } from 'hooks/auth';
 import Print from '../print/Print';
 import { moneyFormat } from '../../helpers/NumberFormat';
+
+const useStyles = makeStyles({
+  container: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'column',
+    flex: 1,
+  },
+});
 
 export interface PrinterData {
   id: number;
@@ -104,21 +117,27 @@ export default function Home(): JSX.Element {
   const user = useSelector((state) => state.user);
   const { loading } = useApp();
   const socket = useMemo(() => io.connect(baseUrl), []);
+  const [wsConnected, setWsConnected] = useState(false);
+  const classes = useStyles();
+  const auth = useAuth();
 
   function formatId(id: number) {
     return `#${`00000${id}`.slice(-6)}`;
   }
 
   useEffect(() => {
+    const timer = setInterval(() => {
+      setWsConnected(socket.connected);
+    }, 2000);
+
     if (restaurant.id) {
       if (socket.disconnected) socket.connect();
+      setWsConnected(socket.connected);
+
       socket.emit('register', restaurant.id);
-      console.log(socket.connected);
-      console.log('Conectado ao socket');
 
       socket.on('reconnect', () => {
         socket.emit('register', restaurant.id);
-        console.log('Reconectado ao socket');
       });
 
       socket.on('stored', (_order: OrderData) => {
@@ -151,11 +170,22 @@ export default function Home(): JSX.Element {
         setOrder(orderReceived);
       });
     }
+
+    return () => {
+      clearInterval(timer);
+    };
   }, [restaurant, socket]);
 
   const handleClose = useCallback(() => {
     setOrder(null);
   }, []);
+
+  function handleLogout() {
+    auth.logout().then(() => {
+      socket.disconnect();
+      history.push('/login');
+    });
+  }
 
   return (
     <>
@@ -166,11 +196,15 @@ export default function Home(): JSX.Element {
           {order ? (
             <Print handleClose={handleClose} order={order} />
           ) : (
-            <div>
-              <Typography variant="h5">{restaurant.name}</Typography>
-              <Typography variant="body2" color="textSecondary">
-                Olá {user.name}
+            <div className={classes.container}>
+              <Typography variant="h4">{restaurant.name}</Typography>
+              <Typography variant="body1" color="textSecondary">
+                {user.name}
               </Typography>
+              <RestaurantStatus wsConnected={wsConnected} />
+              <Button color="primary" variant="text" onClick={handleLogout}>
+                Sair
+              </Button>
             </div>
           )}
         </>
