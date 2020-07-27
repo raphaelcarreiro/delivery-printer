@@ -10,7 +10,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
-import ForgotPassword from 'components/login/ForgotPassword';
 
 const useStyles = makeStyles({
   action: {

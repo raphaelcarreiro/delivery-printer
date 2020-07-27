@@ -77,4 +77,5 @@ export interface OrderData {
   products: Product[];
   shipment: Shipment;
   customer: Customer;
+  printed: boolean;
 }

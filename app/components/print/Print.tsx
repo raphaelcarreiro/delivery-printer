@@ -80,6 +80,7 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
     if (!check) handleClose();
   }, [handleClose, order]);
 
+  // get product printers
   useEffect(() => {
     if (order) {
       let productPrinters: PrinterData[] = [];
@@ -110,19 +111,32 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
   }, [order]);
 
   useEffect(() => {
+    async function setPrinted() {
+      try {
+        await api().post(`/orders/printed`, { order_id: order.id });
+        console.log(`Alterado situação do pedido ${order.id}`);
+        handleClose();
+      } catch (err) {
+        console.log(err);
+        handleClose();
+      }
+    }
+
     if (printers.length > 0) {
       const tp = printers.find((p) => !p.printed);
 
       // close if all order products had been printed
       if (!tp) {
-        handleClose();
+        const check = printers.every((p) => p.printed);
+        if (check) setPrinted();
         return;
       }
 
       setToPrint([tp]);
     }
-  }, [printers, handleClose]);
+  }, [printers, handleClose, order]);
 
+  // print
   useEffect(() => {
     if (toPrint.length > 0) {
       const [win] = remote.BrowserWindow.getAllWindows();
@@ -152,16 +166,6 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
                   return p;
                 })
               );
-              api()
-                .post('/orders/printed', { order_id: printing.order.id })
-                .then(() => {
-                  console.log(
-                    `Alterado situação do pedido ${printing.order.id}`
-                  );
-                })
-                .catch((err) => {
-                  console.log(err);
-                });
             }
           }
         );
@@ -191,16 +195,6 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
                     return p;
                   })
                 );
-                api()
-                  .post('/orders/printed', { order_id: printing.order.id })
-                  .then(() => {
-                    console.log(
-                      `Alterado situação do pedido ${printing.order.id}`
-                    );
-                  })
-                  .catch((err) => {
-                    console.log(err);
-                  });
               }
             }
           );

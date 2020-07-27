@@ -8,7 +8,6 @@ const useStyles = makeStyles({
   status: ({ restaurantIsOpen }: { restaurantIsOpen: boolean }) => ({
     display: 'flex',
     alignItems: 'center',
-    cursor: 'pointer',
     '& svg': {
       color: restaurantIsOpen ? '#28a745' : '#dc3545',
       marginRight: 6,
