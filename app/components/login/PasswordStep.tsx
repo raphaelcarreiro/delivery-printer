@@ -71,7 +71,6 @@ const PasswordStep: React.FC<PasswordStepProps> = ({
         name="password"
         type={showPassword ? 'text' : 'password'}
         required
-        disabled={loading}
         autoComplete="current-password"
         InputProps={{
           endAdornment: (
@@ -96,7 +95,7 @@ const PasswordStep: React.FC<PasswordStepProps> = ({
           disabled={loading}
           type="submit"
           variant="contained"
-          color="secondary"
+          color="primary"
           fullWidth
         >
           Entrar

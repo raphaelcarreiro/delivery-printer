@@ -47,11 +47,10 @@ const UsernameStep: React.FC<UserNameStepProps> = ({
         required
         autoFocus
         autoComplete="email"
-        disabled={loading}
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
-              <PersonIcon />
+              <PersonIcon color="primary" />
             </InputAdornment>
           ),
           classes: { root: classes.input },
@@ -61,8 +60,8 @@ const UsernameStep: React.FC<UserNameStepProps> = ({
         <Button
           disabled={loading}
           type="submit"
+          color="primary"
           variant="contained"
-          color="secondary"
           fullWidth
         >
           Próximo

@@ -129,7 +129,7 @@ const Login: React.FC = () => {
               </div>
             )}
             <div className={classes.description}>
-              <Typography variant="h5">Gerenciador de impressões</Typography>
+              <Typography variant="h5">Delivery Printer</Typography>
               <Typography variant="body2">
                 Impressão automática de pedidos
               </Typography>
