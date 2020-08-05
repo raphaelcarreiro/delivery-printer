@@ -5,8 +5,8 @@ import {
   Typography,
   InputAdornment,
 } from '@material-ui/core';
-import PersonIcon from '@material-ui/icons/Person';
 import { makeStyles } from '@material-ui/core/styles';
+import { MdPerson } from 'react-icons/md';
 
 const useStyles = makeStyles({
   action: {
@@ -50,7 +50,7 @@ const UsernameStep: React.FC<UserNameStepProps> = ({
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
-              <PersonIcon color="primary" />
+              <MdPerson color="primary" />
             </InputAdornment>
           ),
           classes: { root: classes.input },

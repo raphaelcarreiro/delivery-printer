@@ -1,6 +1,6 @@
 import React from 'react';
 import { Typography } from '@material-ui/core';
-import StatusIcon from '@material-ui/icons/FiberManualRecord';
+import { MdFiberManualRecord } from 'react-icons/md';
 import { makeStyles } from '@material-ui/core/styles';
 import { useSelector } from 'store';
 
@@ -11,6 +11,7 @@ const useStyles = makeStyles({
     '& svg': {
       color: restaurantIsOpen ? '#28a745' : '#dc3545',
       marginRight: 6,
+      fontSize: 26,
     },
   }),
   statusContainer: {
@@ -44,14 +45,14 @@ const RestaurantStatus: React.FC<RestaurantStatusProps> = ({ wsConnected }) => {
       {wsConnected ? (
         <div className={classes.statusContainer}>
           <Typography color="inherit" className={classes.status}>
-            <StatusIcon />
+            <MdFiberManualRecord />
             {restaurant.is_open ? 'Online' : 'Offline'}
           </Typography>
         </div>
       ) : (
         <div className={classes.statusContainer}>
           <Typography color="inherit" className={classes.status}>
-            <StatusIcon />
+            <MdFiberManualRecord />
             Conectando...
           </Typography>
         </div>
