@@ -102,6 +102,10 @@ export default function Home(): JSX.Element {
         dispatch(setRestaurantIsOpen(response.isOpen));
       });
 
+      socket.on('stored', (_order: OrderData) =>
+        handleSetOrder(_order, 'order')
+      );
+
       socket.on('printOrder', (_order: OrderData) =>
         handleSetOrder(_order, 'order')
       );
