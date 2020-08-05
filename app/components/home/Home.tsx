@@ -15,6 +15,7 @@ import constants from 'constants/url';
 import { useDispatch } from 'react-redux';
 import { setRestaurantIsOpen } from 'store/modules/restaurant/actions';
 import { api } from 'services/api';
+import Shipment from 'components/print/Shipment';
 import Print from '../print/Print';
 import { moneyFormat } from '../../helpers/NumberFormat';
 import { OrderData } from './types';
@@ -23,6 +24,7 @@ import Status from './Status';
 export default function Home(): JSX.Element {
   const [orders, setOrders] = useState<OrderData[]>([]);
   const [toPrint, setToPrint] = useState<OrderData | null>(null);
+  const [shipment, setShipment] = useState<OrderData | null>(null);
   const [wsConnected, setWsConnected] = useState(false);
   const restaurant = useSelector((state) => state.restaurant);
   const dispatch = useDispatch();
@@ -34,41 +36,41 @@ export default function Home(): JSX.Element {
     return `#${`00000${id}`.slice(-6)}`;
   }
 
+  const formatOrder = useCallback((order: OrderData) => {
+    const date = parseISO(order.created_at);
+    return {
+      ...order,
+      printed: false,
+      formattedId: formatId(order.id),
+      formattedTotal: moneyFormat(order.total),
+      formattedChange: moneyFormat(order.change - order.total),
+      formattedDate: formatRelative(date, new Date(), { locale: ptbr }),
+      formattedSubtotal: moneyFormat(order.subtotal),
+      formattedDiscount: moneyFormat(order.discount),
+      formattedTax: moneyFormat(order.tax),
+      dateDistance: formatDistanceStrict(date, new Date(), {
+        locale: ptbr,
+        roundingMethod: 'ceil',
+      }),
+      products: order.products.map((product) => {
+        product.formattedFinalPrice = moneyFormat(product.final_price);
+        product.formattedPrice = moneyFormat(product.price);
+        return product;
+      }),
+      shipment: {
+        ...order.shipment,
+        formattedScheduledAt: order.shipment.scheduled_at
+          ? format(parseISO(order.shipment.scheduled_at), 'HH:mm')
+          : null,
+      },
+    };
+  }, []);
+
   useEffect(() => {
     async function getOrders() {
       try {
         const response = await api().get('/orders/print/list');
-        setOrders(
-          response.data.map((order: OrderData) => {
-            const date = parseISO(order.created_at);
-            return {
-              ...order,
-              printed: false,
-              formattedId: formatId(order.id),
-              formattedTotal: moneyFormat(order.total),
-              formattedChange: moneyFormat(order.change - order.total),
-              formattedDate: formatRelative(date, new Date(), { locale: ptbr }),
-              formattedSubtotal: moneyFormat(order.subtotal),
-              formattedDiscount: moneyFormat(order.discount),
-              formattedTax: moneyFormat(order.tax),
-              dateDistance: formatDistanceStrict(date, new Date(), {
-                locale: ptbr,
-                roundingMethod: 'ceil',
-              }),
-              products: order.products.map((product) => {
-                product.formattedFinalPrice = moneyFormat(product.final_price);
-                product.formattedPrice = moneyFormat(product.price);
-                return product;
-              }),
-              shipment: {
-                ...order.shipment,
-                formattedScheduledAt: order.shipment.scheduled_at
-                  ? format(parseISO(order.shipment.scheduled_at), 'HH:mm')
-                  : null,
-              },
-            };
-          })
-        );
+        setOrders(response.data.map((order: OrderData) => formatOrder(order)));
       } catch (err) {
         console.log(err);
       }
@@ -80,7 +82,7 @@ export default function Home(): JSX.Element {
     return () => {
       clearInterval(timer);
     };
-  }, []);
+  }, [formatOrder]);
 
   useEffect(() => {
     if (orders.length > 0) {
@@ -111,6 +113,16 @@ export default function Home(): JSX.Element {
         socket.emit('register', restaurant.id);
       });
 
+      socket.on('printOrder', (order: OrderData) => {
+        const formattedOrder = formatOrder(order);
+        setOrders([formattedOrder]);
+      });
+
+      socket.on('printShipment', (order: OrderData) => {
+        const formattedOrder = formatOrder(order);
+        setShipment(formattedOrder);
+      });
+
       socket.on('handleRestaurantState', (response: { isOpen: boolean }) => {
         dispatch(setRestaurantIsOpen(response.isOpen));
       });
@@ -119,9 +131,9 @@ export default function Home(): JSX.Element {
     return () => {
       clearInterval(timer);
     };
-  }, [restaurant, socket, dispatch]);
+  }, [restaurant, socket, dispatch, formatOrder]);
 
-  const handleClose = useCallback(() => {
+  const handleOrderClose = useCallback(() => {
     if (toPrint)
       setOrders((oldOrders) =>
         oldOrders.map((order) => {
@@ -130,6 +142,10 @@ export default function Home(): JSX.Element {
         })
       );
   }, [toPrint]);
+
+  const handleShipmentClose = useCallback(() => {
+    if (shipment) setShipment(null);
+  }, [shipment]);
 
   function handleLogout() {
     auth.logout().then(() => {
@@ -144,8 +160,10 @@ export default function Home(): JSX.Element {
         <InsideLoading />
       ) : (
         <>
-          {toPrint && toPrint.printed === false ? (
-            <Print handleClose={handleClose} order={toPrint} />
+          {toPrint && !toPrint.printed ? (
+            <Print handleClose={handleOrderClose} order={toPrint} />
+          ) : shipment && !shipment.printed ? (
+            <Shipment order={shipment} handleClose={handleShipmentClose} />
           ) : (
             <Status wsConnected={wsConnected} handleLogout={handleLogout} />
           )}

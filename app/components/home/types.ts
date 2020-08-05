@@ -49,12 +49,26 @@ interface Product {
 interface Shipment {
   id: number;
   address: string;
+  number: string;
+  district: string;
+  complement: string;
   formattedScheduledAt: string | null;
   scheduled_at: string | null;
   shipment_method: string;
 }
 
 interface Customer {
+  name: string;
+  phone: string;
+}
+
+interface PaymentMethod {
+  id: number;
+  method: string;
+}
+
+interface Deliverer {
+  id: number;
   name: string;
 }
 
@@ -63,6 +77,7 @@ export interface OrderData {
   formattedId: string;
   formattedTotal: string;
   formattedChange: string;
+  formattedChangeTo: string;
   formattedDate: string;
   formattedSubtotal: string;
   formattedDiscount: string;
@@ -77,5 +92,7 @@ export interface OrderData {
   products: Product[];
   shipment: Shipment;
   customer: Customer;
+  payment_method: PaymentMethod;
+  deliverers: Deliverer[];
   printed: boolean;
 }

@@ -18,9 +18,11 @@ import Print from '../print/Print';
 import { moneyFormat } from '../../helpers/NumberFormat';
 import { OrderData } from './types';
 import Status from './Status';
+import Shipment from '../print/Shipment';
 
 export default function Home(): JSX.Element {
   const [order, setOrder] = useState<OrderData | null>(null);
+  const [shipment, setShipment] = useState<OrderData | null>(null);
   const [wsConnected, setWsConnected] = useState(false);
   const restaurant = useSelector((state) => state.restaurant);
   const dispatch = useDispatch();
@@ -49,6 +51,43 @@ export default function Home(): JSX.Element {
       setWsConnected(socket.connected);
     }, 2000);
 
+    function handleSetOrder(_order: OrderData, type: string): void {
+      const date = parseISO(_order.created_at);
+      const formattedId = formatId(_order.id);
+      const orderReceived: OrderData = {
+        ..._order,
+        formattedId,
+        formattedTotal: moneyFormat(_order.total),
+        formattedChange: moneyFormat(_order.change - _order.total),
+        formattedChangeTo: moneyFormat(_order.change),
+        formattedDate: formatRelative(date, new Date(), { locale: ptbr }),
+        formattedSubtotal: moneyFormat(_order.subtotal),
+        formattedDiscount: moneyFormat(_order.discount),
+        formattedTax: moneyFormat(_order.tax),
+        dateDistance: formatDistanceStrict(date, new Date(), {
+          locale: ptbr,
+          roundingMethod: 'ceil',
+        }),
+        products: _order.products.map((product) => {
+          product.formattedFinalPrice = moneyFormat(product.final_price);
+          product.formattedPrice = moneyFormat(product.price);
+          return product;
+        }),
+        shipment: {
+          ..._order.shipment,
+          formattedScheduledAt: _order.shipment.scheduled_at
+            ? format(parseISO(_order.shipment.scheduled_at), 'HH:mm')
+            : null,
+        },
+      };
+
+      if (type === 'shipment') setShipment(orderReceived);
+      else if (type === 'order') {
+        setOrder(orderReceived);
+        doNotify(formattedId);
+      }
+    }
+
     if (restaurant.id) {
       if (socket.disconnected) socket.connect();
       setWsConnected(socket.connected);
@@ -63,37 +102,13 @@ export default function Home(): JSX.Element {
         dispatch(setRestaurantIsOpen(response.isOpen));
       });
 
-      socket.on('stored', (_order: OrderData) => {
-        const date = parseISO(_order.created_at);
-        const formattedId = formatId(_order.id);
-        const orderReceived: OrderData = {
-          ..._order,
-          formattedId,
-          formattedTotal: moneyFormat(_order.total),
-          formattedChange: moneyFormat(_order.change - _order.total),
-          formattedDate: formatRelative(date, new Date(), { locale: ptbr }),
-          formattedSubtotal: moneyFormat(_order.subtotal),
-          formattedDiscount: moneyFormat(_order.discount),
-          formattedTax: moneyFormat(_order.tax),
-          dateDistance: formatDistanceStrict(date, new Date(), {
-            locale: ptbr,
-            roundingMethod: 'ceil',
-          }),
-          products: _order.products.map((product) => {
-            product.formattedFinalPrice = moneyFormat(product.final_price);
-            product.formattedPrice = moneyFormat(product.price);
-            return product;
-          }),
-          shipment: {
-            ..._order.shipment,
-            formattedScheduledAt: _order.shipment.scheduled_at
-              ? format(parseISO(_order.shipment.scheduled_at), 'HH:mm')
-              : null,
-          },
-        };
-        setOrder(orderReceived);
-        doNotify(formattedId);
-      });
+      socket.on('printOrder', (_order: OrderData) =>
+        handleSetOrder(_order, 'order')
+      );
+
+      socket.on('printShipment', (_order: OrderData) =>
+        handleSetOrder(_order, 'shipment')
+      );
     }
 
     return () => {
@@ -104,8 +119,12 @@ export default function Home(): JSX.Element {
     };
   }, [restaurant, socket, dispatch]);
 
-  const handleClose = useCallback(() => {
+  const handleOrderClose = useCallback(() => {
     setOrder(null);
+  }, []);
+
+  const handleShipmentClose = useCallback(() => {
+    setShipment(null);
   }, []);
 
   function handleLogout() {
@@ -122,7 +141,9 @@ export default function Home(): JSX.Element {
       ) : (
         <>
           {order ? (
-            <Print handleClose={handleClose} order={order} />
+            <Print handleClose={handleOrderClose} order={order} />
+          ) : shipment ? (
+            <Shipment handleClose={handleShipmentClose} order={shipment} />
           ) : (
             <Status wsConnected={wsConnected} handleLogout={handleLogout} />
           )}

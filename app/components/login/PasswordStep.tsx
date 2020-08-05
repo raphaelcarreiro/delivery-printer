@@ -7,9 +7,7 @@ import {
   InputAdornment,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
+import { MdArrowBack, MdVisibility, MdVisibilityOff } from 'react-icons/md';
 
 const useStyles = makeStyles({
   action: {
@@ -54,7 +52,7 @@ const PasswordStep: React.FC<PasswordStepProps> = ({
         className={classes.arrowBackIcon}
         onClick={handleStepBack}
       >
-        <ArrowBackIcon />
+        <MdArrowBack />
       </IconButton>
       <Typography align="center" color="primary">
         Seja bem-vindo {login.name}.
@@ -75,7 +73,7 @@ const PasswordStep: React.FC<PasswordStepProps> = ({
           endAdornment: (
             <InputAdornment position="end">
               <IconButton color="primary" onClick={handlePasswordVisibility}>
-                {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                {showPassword ? <MdVisibilityOff /> : <MdVisibility />}
               </IconButton>
             </InputAdornment>
           ),

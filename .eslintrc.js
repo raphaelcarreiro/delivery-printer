@@ -11,6 +11,7 @@ module.exports = {
     'react/jsx-props-no-spreading': 'off',
     'promise/always-return': 'off',
     'no-console': 'off',
+    'no-nested-ternary': 'off',
     'react/jsx-filename-extension': [
       1,
       { extensions: ['.js', '.jsx', 'ts', 'tsx'] },
