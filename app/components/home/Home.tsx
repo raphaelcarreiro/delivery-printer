@@ -44,6 +44,7 @@ export default function Home(): JSX.Element {
       formattedId: formatId(order.id),
       formattedTotal: moneyFormat(order.total),
       formattedChange: moneyFormat(order.change - order.total),
+      formattedChangeTo: moneyFormat(order.change),
       formattedDate: formatRelative(date, new Date(), { locale: ptbr }),
       formattedSubtotal: moneyFormat(order.subtotal),
       formattedDiscount: moneyFormat(order.discount),
