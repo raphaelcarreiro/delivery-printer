@@ -21,6 +21,8 @@ import { moneyFormat } from '../../helpers/NumberFormat';
 import { OrderData } from './types';
 import Status from './Status';
 
+const socket: SocketIOClient.Socket = io.connect(constants.WS_BASE_URL);
+
 export default function Home(): JSX.Element {
   const [orders, setOrders] = useState<OrderData[]>([]);
   const [toPrint, setToPrint] = useState<OrderData | null>(null);
@@ -28,7 +30,6 @@ export default function Home(): JSX.Element {
   const [wsConnected, setWsConnected] = useState(false);
   const restaurant = useSelector((state) => state.restaurant);
   const dispatch = useDispatch();
-  const socket = useMemo(() => io.connect(constants.WS_BASE_URL), []);
   const { loading } = useApp();
   const auth = useAuth();
 
@@ -131,8 +132,9 @@ export default function Home(): JSX.Element {
 
     return () => {
       clearInterval(timer);
+      socket.disconnect();
     };
-  }, [restaurant, socket, dispatch, formatOrder]);
+  }, [restaurant, dispatch, formatOrder]);
 
   const handleOrderClose = useCallback(() => {
     if (toPrint)

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   formatRelative,
   parseISO,
@@ -20,13 +20,14 @@ import { OrderData } from './types';
 import Status from './Status';
 import Shipment from '../print/Shipment';
 
+const socket: SocketIOClient.Socket = io.connect(constants.WS_BASE_URL);
+
 export default function Home(): JSX.Element {
   const [order, setOrder] = useState<OrderData | null>(null);
   const [shipment, setShipment] = useState<OrderData | null>(null);
   const [wsConnected, setWsConnected] = useState(false);
   const restaurant = useSelector((state) => state.restaurant);
   const dispatch = useDispatch();
-  const socket = useMemo(() => io.connect(constants.WS_BASE_URL), []);
   const { loading } = useApp();
   const auth = useAuth();
 
@@ -117,11 +118,11 @@ export default function Home(): JSX.Element {
 
     return () => {
       clearInterval(timer);
-      socket.off('stored');
-      socket.off('handleRestaurantState');
+      // socket.off('stored');
+      // socket.off('handleRestaurantState');
       socket.disconnect();
     };
-  }, [restaurant, socket, dispatch]);
+  }, [restaurant, dispatch]);
 
   const handleOrderClose = useCallback(() => {
     setOrder(null);
