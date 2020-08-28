@@ -1,5 +1,8 @@
 import { RestaurantActionTypes, SET_RESTAURANT, SET_IS_OPEN } from './types';
 
+export interface RestaurantConfigs {
+  realtime_print: boolean;
+}
 export interface RestaurantState {
   id: number;
   is_open: boolean;
@@ -21,6 +24,7 @@ export interface RestaurantState {
   image_id: number;
   cover_id: number;
   working_hours: string;
+  configs: RestaurantConfigs;
 }
 
 const INITIAL_STATE: RestaurantState = {} as RestaurantState;
