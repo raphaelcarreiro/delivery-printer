@@ -47,47 +47,47 @@ export default function Home(): JSX.Element {
     });
   }
 
+  const handleSetOrder = useCallback((_order: OrderData, type: string) => {
+    const date = parseISO(_order.created_at);
+    const formattedId = formatId(_order.id);
+    const orderReceived: OrderData = {
+      ..._order,
+      formattedId,
+      formattedTotal: moneyFormat(_order.total),
+      formattedChange: moneyFormat(_order.change - _order.total),
+      formattedChangeTo: moneyFormat(_order.change),
+      formattedDate: formatRelative(date, new Date(), { locale: ptbr }),
+      formattedSubtotal: moneyFormat(_order.subtotal),
+      formattedDiscount: moneyFormat(_order.discount),
+      formattedTax: moneyFormat(_order.tax),
+      dateDistance: formatDistanceStrict(date, new Date(), {
+        locale: ptbr,
+        roundingMethod: 'ceil',
+      }),
+      products: _order.products.map((product) => {
+        product.formattedFinalPrice = moneyFormat(product.final_price);
+        product.formattedPrice = moneyFormat(product.price);
+        return product;
+      }),
+      shipment: {
+        ..._order.shipment,
+        formattedScheduledAt: _order.shipment.scheduled_at
+          ? format(parseISO(_order.shipment.scheduled_at), 'HH:mm')
+          : null,
+      },
+    };
+
+    if (type === 'shipment') setShipment(orderReceived);
+    else if (type === 'order') {
+      setOrder(orderReceived);
+      doNotify(formattedId);
+    }
+  }, []);
+
   useEffect(() => {
     const timer = setInterval(() => {
       setWsConnected(socket.connected);
     }, 2000);
-
-    function handleSetOrder(_order: OrderData, type: string): void {
-      const date = parseISO(_order.created_at);
-      const formattedId = formatId(_order.id);
-      const orderReceived: OrderData = {
-        ..._order,
-        formattedId,
-        formattedTotal: moneyFormat(_order.total),
-        formattedChange: moneyFormat(_order.change - _order.total),
-        formattedChangeTo: moneyFormat(_order.change),
-        formattedDate: formatRelative(date, new Date(), { locale: ptbr }),
-        formattedSubtotal: moneyFormat(_order.subtotal),
-        formattedDiscount: moneyFormat(_order.discount),
-        formattedTax: moneyFormat(_order.tax),
-        dateDistance: formatDistanceStrict(date, new Date(), {
-          locale: ptbr,
-          roundingMethod: 'ceil',
-        }),
-        products: _order.products.map((product) => {
-          product.formattedFinalPrice = moneyFormat(product.final_price);
-          product.formattedPrice = moneyFormat(product.price);
-          return product;
-        }),
-        shipment: {
-          ..._order.shipment,
-          formattedScheduledAt: _order.shipment.scheduled_at
-            ? format(parseISO(_order.shipment.scheduled_at), 'HH:mm')
-            : null,
-        },
-      };
-
-      if (type === 'shipment') setShipment(orderReceived);
-      else if (type === 'order') {
-        setOrder(orderReceived);
-        doNotify(formattedId);
-      }
-    }
 
     if (restaurant.id) {
       if (socket.disconnected) socket.connect();
@@ -118,11 +118,9 @@ export default function Home(): JSX.Element {
 
     return () => {
       clearInterval(timer);
-      // socket.off('stored');
-      // socket.off('handleRestaurantState');
       socket.disconnect();
     };
-  }, [restaurant, dispatch]);
+  }, [restaurant, dispatch, handleSetOrder]);
 
   const handleOrderClose = useCallback(() => {
     setOrder(null);
