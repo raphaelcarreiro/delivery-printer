@@ -1,8 +1,7 @@
 import React from 'react';
-import { makeStyles, Typography, Button, Switch } from '@material-ui/core';
+import { makeStyles, Typography, Button } from '@material-ui/core';
 import { useSelector } from 'store';
 import RestaurantStatus from 'components/restaurant-status/RestaurantStatus';
-import { useHomePage } from 'containers/HomePage';
 
 const useStyles = makeStyles({
   container: {
@@ -34,7 +33,7 @@ interface StatusProps {
 const Status: React.FC<StatusProps> = ({ wsConnected, handleLogout }) => {
   const classes = useStyles();
   const restaurant = useSelector((state) => state.restaurant);
-  const { handleSetRealTime, realTime } = useHomePage();
+  // const { handleSetRealTime, realTime } = useHomePage();
   const user = useSelector((state) => state.user);
 
   return (
@@ -44,7 +43,7 @@ const Status: React.FC<StatusProps> = ({ wsConnected, handleLogout }) => {
         {user.name}
       </Typography>
       <RestaurantStatus wsConnected={wsConnected} />
-      <div className={classes.formControl}>
+      {/* <div className={classes.formControl}>
         <div>
           <span>TEMPO REAL</span>
           <Switch
@@ -57,7 +56,7 @@ const Status: React.FC<StatusProps> = ({ wsConnected, handleLogout }) => {
           Se desativado, a cada 1 minuto será verificado a existência de novos
           pedidos.
         </Typography>
-      </div>
+      </div> */}
       <Button color="primary" variant="text" onClick={handleLogout}>
         Sair
       </Button>

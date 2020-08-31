@@ -79,7 +79,7 @@ export default function Home(): JSX.Element {
     }
 
     // a cada 1 minuto verifica se existe pedidos para imprimir
-    const timer = setInterval(getOrders, 60000);
+    const timer = setInterval(getOrders, 18000);
 
     return () => {
       clearInterval(timer);
@@ -115,9 +115,15 @@ export default function Home(): JSX.Element {
         socket.emit('register', restaurant.id);
       });
 
+      socket.on('stored', (order: OrderData) => {
+        const formattedOrder = formatOrder(order);
+        setOrders((oldOrders) => [...oldOrders, formattedOrder]);
+      });
+
       socket.on('printOrder', (order: OrderData) => {
         const formattedOrder = formatOrder(order);
-        setOrders([formattedOrder]);
+        setOrders((oldOrders) => [...oldOrders, formattedOrder]);
+        // setOrders([formattedOrder]);
       });
 
       socket.on('printShipment', (order: OrderData) => {

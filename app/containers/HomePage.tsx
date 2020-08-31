@@ -2,7 +2,6 @@ import React, { useState, useCallback, useContext, useEffect } from 'react';
 import { api } from 'services/api';
 import { RestaurantConfigs } from 'store/modules/restaurant/reducer';
 import { useSelector } from 'store';
-import HomeWs from '../components/home/HomeWs';
 import Home from '../components/home/Home';
 
 interface HomePageContextData {
@@ -41,7 +40,7 @@ export default function HomePage() {
 
   return (
     <HomePageContext.Provider value={{ realTime, handleSetRealTime }}>
-      {realTime ? <HomeWs /> : <Home />}
+      <Home />
     </HomePageContext.Provider>
   );
 }
