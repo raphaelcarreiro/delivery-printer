@@ -11,6 +11,8 @@ import { MdPerson } from 'react-icons/md';
 const useStyles = makeStyles({
   action: {
     marginTop: 20,
+    display: 'flex',
+    justifyContent: 'center',
   },
   input: {
     boxSizing: 'border-box',
@@ -50,7 +52,7 @@ const UsernameStep: React.FC<UserNameStepProps> = ({
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
-              <MdPerson color="primary" />
+              <MdPerson size={20} color="#666" />
             </InputAdornment>
           ),
           classes: { root: classes.input },
@@ -62,7 +64,6 @@ const UsernameStep: React.FC<UserNameStepProps> = ({
           type="submit"
           color="primary"
           variant="contained"
-          fullWidth
         >
           Próximo
         </Button>

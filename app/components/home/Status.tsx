@@ -23,6 +23,11 @@ const useStyles = makeStyles({
     },
     margin: '20px 0',
   },
+  exitButton: {
+    position: 'absolute',
+    bottom: 10,
+    right: 10,
+  },
 });
 
 interface StatusProps {
@@ -33,7 +38,6 @@ interface StatusProps {
 const Status: React.FC<StatusProps> = ({ wsConnected, handleLogout }) => {
   const classes = useStyles();
   const restaurant = useSelector((state) => state.restaurant);
-  // const { handleSetRealTime, realTime } = useHomePage();
   const user = useSelector((state) => state.user);
 
   return (
@@ -43,21 +47,13 @@ const Status: React.FC<StatusProps> = ({ wsConnected, handleLogout }) => {
         {user.name}
       </Typography>
       <RestaurantStatus wsConnected={wsConnected} />
-      {/* <div className={classes.formControl}>
-        <div>
-          <span>TEMPO REAL</span>
-          <Switch
-            color="primary"
-            onChange={handleSetRealTime}
-            checked={realTime}
-          />
-        </div>
-        <Typography variant="body2" color="textSecondary">
-          Se desativado, a cada 1 minuto será verificado a existência de novos
-          pedidos.
-        </Typography>
-      </div> */}
-      <Button color="primary" variant="text" onClick={handleLogout}>
+      <Button
+        className={classes.exitButton}
+        color="primary"
+        variant="text"
+        onClick={handleLogout}
+        size="small"
+      >
         Sair
       </Button>
     </div>

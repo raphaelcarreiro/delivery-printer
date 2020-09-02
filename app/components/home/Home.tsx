@@ -72,7 +72,12 @@ export default function Home(): JSX.Element {
     async function getOrders() {
       try {
         const response = await api().get('/orders/print/list');
-        setOrders(response.data.map((order: OrderData) => formatOrder(order)));
+        if (response.data.length > 0) {
+          const formattedOrders = response.data.map((order: OrderData) =>
+            formatOrder(order)
+          );
+          setOrders((oldOrders) => [...oldOrders, formattedOrders]);
+        }
       } catch (err) {
         console.log(err);
       }
@@ -123,7 +128,6 @@ export default function Home(): JSX.Element {
       socket.on('printOrder', (order: OrderData) => {
         const formattedOrder = formatOrder(order);
         setOrders((oldOrders) => [...oldOrders, formattedOrder]);
-        // setOrders([formattedOrder]);
       });
 
       socket.on('printShipment', (order: OrderData) => {

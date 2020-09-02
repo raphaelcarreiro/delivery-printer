@@ -12,6 +12,8 @@ import { MdArrowBack, MdVisibility, MdVisibilityOff } from 'react-icons/md';
 const useStyles = makeStyles({
   action: {
     marginTop: 20,
+    display: 'flex',
+    justifyContent: 'center',
   },
   arrowBackIcon: {
     position: 'absolute',
@@ -72,8 +74,12 @@ const PasswordStep: React.FC<PasswordStepProps> = ({
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
-              <IconButton color="primary" onClick={handlePasswordVisibility}>
-                {showPassword ? <MdVisibilityOff /> : <MdVisibility />}
+              <IconButton onClick={handlePasswordVisibility}>
+                {showPassword ? (
+                  <MdVisibilityOff size={20} color="#666" />
+                ) : (
+                  <MdVisibility size={20} color="#666" />
+                )}
               </IconButton>
             </InputAdornment>
           ),
@@ -93,7 +99,6 @@ const PasswordStep: React.FC<PasswordStepProps> = ({
           type="submit"
           variant="contained"
           color="primary"
-          fullWidth
         >
           Entrar
         </Button>

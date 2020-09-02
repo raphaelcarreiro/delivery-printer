@@ -143,6 +143,16 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
           <Typography className={classes.date}>
             {order.formattedDate}
           </Typography>
+          {order.shipment.shipment_method === 'customer_collect' &&
+          !order.shipment.scheduled_at ? (
+            <Typography gutterBottom>Cliente retira</Typography>
+          ) : (
+            order.shipment.scheduled_at && (
+              <Typography gutterBottom>
+                Retirada ás {order.shipment.formattedScheduledAt}
+              </Typography>
+            )
+          )}
           <div className={classes.customerData}>
             <Typography>Cliente</Typography>
             <Typography>{order.customer.name}</Typography>

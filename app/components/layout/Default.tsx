@@ -17,7 +17,7 @@ const useStyles = makeStyles((theme) => ({
     paddingTop: 0,
   },
   content: {
-    minHeight: 'calc(100vh - 104px)',
+    minHeight: '100vh',
     padding: '20px 30px',
     position: 'relative',
     display: 'flex',
