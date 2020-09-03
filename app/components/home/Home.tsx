@@ -76,7 +76,7 @@ export default function Home(): JSX.Element {
           const formattedOrders = response.data.map((order: OrderData) =>
             formatOrder(order)
           );
-          setOrders((oldOrders) => [...oldOrders, formattedOrders]);
+          setOrders((oldOrders) => [...oldOrders, ...formattedOrders]);
         }
       } catch (err) {
         console.log(err);
