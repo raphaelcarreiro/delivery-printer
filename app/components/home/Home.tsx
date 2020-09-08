@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   formatRelative,
   parseISO,
@@ -46,7 +46,7 @@ export default function Home(): JSX.Element {
       formattedTotal: moneyFormat(order.total),
       formattedChange: moneyFormat(order.change - order.total),
       formattedChangeTo: moneyFormat(order.change),
-      formattedDate: formatRelative(date, new Date(), { locale: ptbr }),
+      formattedDate: format(date, "PP 'ás' p", { locale: ptbr }),
       formattedSubtotal: moneyFormat(order.subtotal),
       formattedDiscount: moneyFormat(order.discount),
       formattedTax: moneyFormat(order.tax),
