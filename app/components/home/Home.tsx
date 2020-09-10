@@ -1,10 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import {
-  formatRelative,
-  parseISO,
-  formatDistanceStrict,
-  format,
-} from 'date-fns';
+import { parseISO, formatDistanceStrict, format } from 'date-fns';
 import ptbr from 'date-fns/locale/pt-BR';
 import { useSelector, history } from 'store';
 import { useApp } from 'containers/App';

@@ -1,7 +1,7 @@
 {
   "name": "delivery-printer",
   "productName": "delivery-printer",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Delivery printer",
   "main": "./main.prod.js",
   "author": {
