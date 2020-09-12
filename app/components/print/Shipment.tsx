@@ -271,14 +271,14 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
             {order.deliverers.length > 0 && (
               <>
                 {order.deliverers.map((deliverer) => (
-                  <>
+                  <Fragment key={deliverer.id}>
                     <div>
                       <Typography>Entregador</Typography>
                     </div>
                     <div>
                       <Typography>{deliverer.name}</Typography>
                     </div>
-                  </>
+                  </Fragment>
                 ))}
               </>
             )}

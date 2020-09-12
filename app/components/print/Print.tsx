@@ -9,7 +9,8 @@ import Complements from './Complements';
 const useStyles = makeStyles({
   container: {
     maxWidth: 300,
-    padding: 15,
+    padding: '15px 15px 30px 15px',
+    // padding: 15,
     backgroundColor: '#faebd7',
     fontSize: 14,
     border: '2px dashed #ccc',
@@ -214,8 +215,14 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
             <Typography variant="h6" className={classes.title} gutterBottom>
               PEDIDO {order.formattedId}
             </Typography>
-            <Typography>{order.customer.name}</Typography>
             <Typography>{order.formattedDate}</Typography>
+            <Typography gutterBottom>{order.customer.name}</Typography>
+            {order.shipment.shipment_method === 'delivery' && (
+              <Typography variant="body2">
+                {order.shipment.address}, {order.shipment.number},{' '}
+                {order.shipment.district}
+              </Typography>
+            )}
             {order.shipment.shipment_method === 'customer_collect' &&
             !order.shipment.scheduled_at ? (
               <Typography>**Cliente retira**</Typography>

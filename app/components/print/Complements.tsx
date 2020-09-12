@@ -35,7 +35,7 @@ const OrderProductComplements: React.FC<OrderProductComplementProps> = ({
               : { display: 'inline-flex' }
           }
         >
-          <span className={classes.complementName} key={complement.id}>
+          <span className={classes.complementName}>
             {complement.name}
             {index !== complementCategory.complements.length - 1 && ', '}
           </span>

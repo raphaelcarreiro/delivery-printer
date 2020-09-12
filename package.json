@@ -1,7 +1,7 @@
 {
   "name": "delivery-printer",
   "productName": "delivery-printer",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "description": "Aplicação para impressão automática de pedidos",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
@@ -52,7 +52,7 @@
     ]
   },
   "build": {
-    "productName": "Delivery Printer",
+    "productName": "SGrande Delivery Printer",
     "appId": "com.topnfe.delivery",
     "files": [
       "dist/",
@@ -106,7 +106,7 @@
     "url": "git+https://github.com/raphaelcarreiro/delivery-printer.git"
   },
   "author": {
-    "name": "Raphael M Carreiro",
+    "name": "SGrande Delivery",
     "email": "raphaelcarreiro@hotmail.com"
   },
   "license": "MIT",
