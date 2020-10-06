@@ -3,6 +3,7 @@ export interface PrinterData {
   name: string;
   order: OrderData;
   printed?: boolean;
+  amount?: number;
 }
 
 interface Additional {

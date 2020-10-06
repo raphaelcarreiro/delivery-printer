@@ -11,7 +11,8 @@ import { useDispatch } from 'react-redux';
 import { setRestaurantIsOpen } from 'store/modules/restaurant/actions';
 import { api } from 'services/api';
 import Shipment from 'components/print/Shipment';
-import Print from '../print/Print';
+import PrintByProduct from 'components/print/PrintByProduct';
+import Print from 'components/print/Print';
 import { moneyFormat } from '../../helpers/NumberFormat';
 import { OrderData } from './types';
 import Status from './Status';
@@ -169,7 +170,11 @@ export default function Home(): JSX.Element {
       ) : (
         <>
           {toPrint && !toPrint.printed ? (
-            <Print handleClose={handleOrderClose} order={toPrint} />
+            restaurant.configs.print_by_product ? (
+              <PrintByProduct handleClose={handleOrderClose} order={toPrint} />
+            ) : (
+              <Print handleClose={handleOrderClose} order={toPrint} />
+            )
           ) : shipment && !shipment.printed ? (
             <Shipment order={shipment} handleClose={handleShipmentClose} />
           ) : (
