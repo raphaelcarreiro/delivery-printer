@@ -1,4 +1,4 @@
-export default process.env.NODE_ENV !== 'production'
+export default process.env.NODE_ENV === 'production'
   ? {
       // BASE_URL: 'https://api2.topnfe.com.br/api/admin/',
       BASE_URL: 'https://api.sgrande.delivery/api/admin/',
