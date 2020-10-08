@@ -52,10 +52,14 @@ p {
 }
 
 @media print {
-  @page {
-    margin: 0;
-    size: 80mm auto;
+  * {
+    page-break-before: always;
   }
+}
+
+@page {
+  margin: 0;
+  size: 80mm auto;
 }
 
 .zoom-animation {

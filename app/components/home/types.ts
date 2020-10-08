@@ -1,9 +1,18 @@
 export interface PrinterData {
-  id: number;
+  id: number | string;
   name: string;
   order: OrderData;
   printed?: boolean;
-  amount?: number;
+  currentAmount?: number;
+}
+
+export interface ProductPrinterData {
+  id: number | string;
+  productId: number;
+  name: string;
+  order: OrderData;
+  printed?: boolean;
+  currentAmount: number;
 }
 
 interface Additional {

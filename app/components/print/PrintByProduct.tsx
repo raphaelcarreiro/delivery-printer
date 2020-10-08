@@ -1,7 +1,11 @@
 import React, { useEffect, useState, Fragment } from 'react';
 import { remote } from 'electron';
 import { makeStyles } from '@material-ui/styles';
-import { OrderData, PrinterData } from 'components/home/types';
+import {
+  OrderData,
+  PrinterData,
+  ProductPrinterData,
+} from 'components/home/types';
 import { Typography } from '@material-ui/core';
 import { api } from 'services/api';
 import Complements from './Complements';
@@ -72,8 +76,8 @@ interface PrintProps {
 
 const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
   const classes = useStyles();
-  const [products, setProducts] = useState<PrinterData[]>([]);
-  const [toPrint, setToPrint] = useState<PrinterData[]>([]);
+  const [products, setProducts] = useState<ProductPrinterData[]>([]);
+  const [toPrint, setToPrint] = useState<ProductPrinterData[]>([]);
 
   // close if there is not printer in product
   useEffect(() => {
@@ -85,30 +89,31 @@ const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
   useEffect(() => {
     if (!order) return;
 
-    let productsToPrint: PrinterData[] = [];
+    let productsToPrint: ProductPrinterData[] = [];
     order.products.forEach((product) => {
       if (product.printer) {
-        if (
-          !productsToPrint.some(
-            (productToPrint) => productToPrint.id === product.id
-          )
-        )
+        let i = 1;
+        do {
           productsToPrint.push({
-            id: product.id,
+            id: `${product.id}-${i}`,
+            productId: product.id,
             name: product.printer.name,
             order,
             printed: false,
-            amount: product.amount,
+            currentAmount: i,
           });
+          i += 1;
+        } while (i <= product.amount);
       }
     });
 
     productsToPrint = productsToPrint.map((productToPrint) => {
       productToPrint.order = {
         ...order,
-        products: order.products.filter((product) => {
-          return product.printer && product.id === productToPrint.id;
-        }),
+        products: order.products.filter(
+          (product) =>
+            product.printer && product.id === productToPrint.productId
+        ),
       };
       productToPrint.printed = false;
       return productToPrint;
@@ -159,7 +164,7 @@ const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
             deviceName: printing.name,
             color: false,
             collate: false,
-            copies: printing.amount ? printing.amount : 1,
+            copies: 1,
             silent: true,
             margins: {
               marginType: 'none',
@@ -188,7 +193,7 @@ const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
             {
               color: false,
               collate: false,
-              copies: printing.amount ? printing.amount : 1,
+              copies: 1,
               silent: true,
               margins: {
                 marginType: 'none',
@@ -257,7 +262,9 @@ const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
                   {printer.order.products.map((product) => (
                     <tr key={product.id}>
                       <td className={classes.productAmount}>
-                        <Typography>{product.amount}x</Typography>
+                        <Typography>
+                          {printer.currentAmount}/{product.amount}
+                        </Typography>
                       </td>
                       <td className={classes.product}>
                         <Typography className={classes.productName}>
