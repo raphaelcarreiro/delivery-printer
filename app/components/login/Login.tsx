@@ -1,57 +1,47 @@
 import React, { useState, useEffect, FormEvent, ChangeEvent } from 'react';
-import { Grid, Typography, CircularProgress } from '@material-ui/core';
+import { Typography, Button } from '@material-ui/core';
 import UsernameStep from 'components/login/UsernameStep';
 import PasswordStep from 'components/login/PasswordStep';
 import { makeStyles } from '@material-ui/core/styles';
 import { useAuth } from 'hooks/auth';
 import { history } from 'store';
 import { useMessaging } from 'hooks/messaging';
+import InsideSaving from 'components/loading/InsideSaving';
 
-const useStyles = makeStyles({
+const useStyles = makeStyles((theme) => ({
   container: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    position: 'fixed',
+    flex: 1,
+    backgroundColor: theme.palette.primary.light,
+    [theme.breakpoints.down('sm')]: {
+      // backgroundColor: '#fff',
+    },
   },
   paper: {
-    padding: '0 20px',
+    padding: '30px',
     boxShadow: 'none',
     display: 'flex',
     alignItems: 'center',
     flexDirection: 'column',
     position: 'relative',
-  },
-  form: {
-    width: '100%',
-  },
-  loadingWrap: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 100,
-    display: 'flex',
-    justifyContent: 'center',
-    flexDirection: 'column',
-    alignItems: 'center',
-  },
-  appName: {
-    marginTop: 10,
+    backgroundColor: '#fff',
+    minWidth: 400,
+    [theme.breakpoints.down('sm')]: {
+      minWidth: 350,
+    },
   },
   logo: {
-    marginBottom: 30,
+    width: 90,
   },
-  description: {
-    marginBottom: 30,
-    textAlign: 'center',
+  title: {
+    margin: '30px 0 0',
   },
-});
+  footer: {
+    marginTop: 30,
+  },
+}));
 
 const Login: React.FC = () => {
   const classes = useStyles({
@@ -62,7 +52,7 @@ const Login: React.FC = () => {
   const [name, setName] = useState('');
   const [step, setStep] = useState('email');
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const [shownPassword, setShownPassword] = useState(false);
   const messaging = useMessaging();
   const auth = useAuth();
 
@@ -115,47 +105,57 @@ const Login: React.FC = () => {
   }
 
   function handlePasswordVisibility() {
-    setShowPassword(!showPassword);
+    setShownPassword(!shownPassword);
   }
 
   return (
-    <>
-      <div className={classes.container}>
-        <Grid item xs={12} sm={8} md={6} lg={3} xl={3}>
-          <div className={classes.paper}>
-            {loading && (
-              <div className={classes.loadingWrap}>
-                <CircularProgress color="secondary" />
-              </div>
-            )}
-            <div className={classes.description}>
-              <Typography variant="h5">SGrande Delivery Printer</Typography>
-              <Typography variant="body2">
-                Impressão automática de pedidos
-              </Typography>
-            </div>
-            <form onSubmit={handleSubmit}>
-              {step === 'email' ? (
-                <UsernameStep
-                  handleChange={handleChange}
-                  email={email}
-                  loading={loading}
-                />
-              ) : (
-                <PasswordStep
-                  handleChange={handleChange}
-                  login={{ email, password, name }}
-                  showPassword={showPassword}
-                  handleStepBack={handleStepBack}
-                  handlePasswordVisibility={handlePasswordVisibility}
-                  loading={loading}
-                />
-              )}
-            </form>
-          </div>
-        </Grid>
+    <div className={classes.container}>
+      <div className={classes.paper}>
+        {loading && <InsideSaving />}
+        <div>
+          <img
+            src="https://admin.sgrande.delivery/logo192.png"
+            className={classes.logo}
+            alt="Logo sgrande.delivery"
+          />
+        </div>
+        <div className={classes.title}>
+          <Typography variant="h6">Login</Typography>
+        </div>
+        <form onSubmit={handleSubmit} autoComplete="on">
+          {step === 'email' ? (
+            <UsernameStep
+              handleChange={handleChange}
+              email={email}
+              loading={loading}
+            />
+          ) : (
+            <PasswordStep
+              handleChange={handleChange}
+              login={{ email, password, name }}
+              shownPassword={shownPassword}
+              handleStepBack={handleStepBack}
+              handlePasswordVisibility={handlePasswordVisibility}
+              loading={loading}
+            />
+          )}
+          <Button
+            disabled={loading}
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+          >
+            {step === 'email' ? 'Próximo' : 'Entrar'}
+          </Button>
+        </form>
+        <div className={classes.footer}>
+          <Typography variant="body2" color="textSecondary">
+            SGrande Delivery Printer 2020
+          </Typography>
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 

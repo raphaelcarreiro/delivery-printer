@@ -18,6 +18,7 @@ export interface ProductPrinterData {
 interface Additional {
   id: number;
   name: string;
+  amount: number;
 }
 
 interface Ingredient {

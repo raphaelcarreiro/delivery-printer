@@ -4,7 +4,7 @@ const theme = createMuiTheme({
   palette: {
     primary: {
       // light: will be calculated from palette.primary.main,
-      main: '#F44336',
+      main: '#f0592a',
       // dark: will be calculated from palette.primary.main,
       // contrastText: will be calculated to contrast with palette.primary.main
     },
@@ -33,7 +33,15 @@ const theme = createMuiTheme({
       'Helvetica Neue',
     ].join(','),
   },
+  shape: {
+    borderRadius: 0,
+  },
   overrides: {
+    MuiButton: {
+      contained: {
+        boxShadow: 'none',
+      },
+    },
     MuiInput: {
       root: {
         fontWeight: 300,

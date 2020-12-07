@@ -271,7 +271,7 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
                                 className={classes.additional}
                                 key={additional.id}
                               >
-                                c/ {additional.name}
+                                c/ {additional.amount}x {additional.name}
                               </Typography>
                             ))}
                           </>

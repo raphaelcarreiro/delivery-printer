@@ -1,6 +1,6 @@
 import React from 'react';
 import { RouteProps, Route } from 'react-router-dom';
-import Default from 'components/layout/Default';
+import AuthLayout from 'components/layout/AuthLayout';
 
 interface PublicRouteProps extends RouteProps {
   component: React.ComponentType;
@@ -14,9 +14,9 @@ const PublicRoute: React.FC<PublicRouteProps> = ({
     <Route
       {...rest}
       render={() => (
-        <Default>
+        <AuthLayout>
           <Component />
-        </Default>
+        </AuthLayout>
       )}
     />
   );
