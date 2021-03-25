@@ -29,6 +29,7 @@ interface Ingredient {
 export interface ComplementCategory {
   id: number;
   name: string;
+  print_name: string | null;
   complements: Complement[];
 }
 

@@ -297,7 +297,7 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
                                 {category.complements.length > 0 && (
                                   <div className={classes.complementCategory}>
                                     <Typography variant="body2">
-                                      {category.name}
+                                      {category.print_name || category.name}
                                     </Typography>
                                     <Complements
                                       complementCategory={category}
