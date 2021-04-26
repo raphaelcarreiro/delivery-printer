@@ -3,24 +3,22 @@ import { remote } from 'electron';
 import { makeStyles } from '@material-ui/styles';
 import { OrderData } from 'components/home/types';
 import { Typography } from '@material-ui/core';
+import PrintTypography from 'components/print-typography/PrintTypography';
 import Complements from './Complements';
 
 const useStyles = makeStyles({
   container: {
-    maxWidth: 300,
+    maxWidth: '80mm',
     minHeight: 300,
     padding: 15,
     backgroundColor: '#faebd7',
-    fontSize: 14,
     border: '2px dashed #ccc',
-    '& p, span, h6': {
-      fontWeight: 600,
-      color: '#000',
-    },
     '@media print': {
       '&': {
         backgroundColor: 'transparent',
         border: 'none',
+        padding: 0,
+        marginRight: 30,
       },
     },
   },
@@ -29,7 +27,7 @@ const useStyles = makeStyles({
   },
   products: {
     marginBottom: 15,
-    padding: '10px 0',
+    padding: '5px 0 0',
     borderTop: '1px dashed #333',
   },
   loading: {
@@ -38,7 +36,7 @@ const useStyles = makeStyles({
     alignItems: 'center',
   },
   headerProducts: {
-    marginTop: 15,
+    marginTop: 7,
   },
   productName: {
     textTransform: 'uppercase',
@@ -47,13 +45,17 @@ const useStyles = makeStyles({
   },
   product: {
     width: '100%',
+    paddingBottom: 10,
   },
   productAmount: {
-    minWidth: 30,
+    minWidth: 25,
+    display: 'flex',
+    paddingTop: 0,
   },
   customerData: {
     display: 'grid',
-    gridTemplateColumns: '0.5fr 1fr',
+    gridTemplateColumns: '70px 1fr',
+    marginBottom: 2,
   },
   title: {
     fontWeight: 600,
@@ -68,11 +70,15 @@ const useStyles = makeStyles({
   },
   totals: {
     display: 'grid',
-    gridTemplateColumns: '0.9fr 1fr',
+    gridTemplateColumns: '100px 1fr',
+    rowGap: '4px',
     '& div': {
       display: 'flex',
       alignItems: 'center',
     },
+  },
+  developer: {
+    marginTop: 15,
   },
 });
 
@@ -95,7 +101,6 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
     }
   }, [order]);
 
-  // print
   useEffect(() => {
     if (toPrint) {
       // fecha se o pedido já foi impresso
@@ -137,50 +142,48 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
     <>
       {toPrint && !toPrint.printed && (
         <div className={classes.container}>
-          <Typography gutterBottom variant="h6" className={classes.title}>
+          <PrintTypography fontSize={20} bold gutterBottom>
             PEDIDO {order.formattedId}
-          </Typography>
-          <Typography className={classes.date}>
-            {order.formattedDate}
-          </Typography>
+          </PrintTypography>
+          <PrintTypography gutterBottom>{order.formattedDate}</PrintTypography>
           {order.shipment.shipment_method === 'customer_collect' &&
           !order.shipment.scheduled_at ? (
-            <Typography gutterBottom>Cliente retira</Typography>
+            <PrintTypography gutterBottom>Cliente retira</PrintTypography>
           ) : (
             order.shipment.scheduled_at && (
-              <Typography gutterBottom>
+              <PrintTypography gutterBottom>
                 Retirada ás {order.shipment.formattedScheduledAt}
-              </Typography>
+              </PrintTypography>
             )
           )}
           <div className={classes.customerData}>
-            <Typography>Cliente</Typography>
-            <Typography>{order.customer.name}</Typography>
+            <PrintTypography>Cliente</PrintTypography>
+            <PrintTypography>{order.customer.name}</PrintTypography>
           </div>
           <div className={classes.customerData}>
-            <Typography>Telefone</Typography>
-            <Typography>{order.customer.phone}</Typography>
+            <PrintTypography>Telefone</PrintTypography>
+            <PrintTypography>{order.customer.phone}</PrintTypography>
           </div>
           {order.shipment.shipment_method === 'delivery' && (
             <div className={classes.customerData}>
-              <Typography>Endereço</Typography>
+              <PrintTypography>Endereço</PrintTypography>
               <div>
-                <Typography>
-                  {order.shipment.address}, nº {order.shipment.number}
-                </Typography>
-                <Typography>{order.shipment.district}</Typography>
-                <Typography>{order.shipment.complement}</Typography>
+                <PrintTypography>
+                  {`${order.shipment.address}, nº ${order.shipment.number}`}
+                </PrintTypography>
+                <PrintTypography>{order.shipment.district}</PrintTypography>
+                <PrintTypography>{order.shipment.complement}</PrintTypography>
               </div>
             </div>
           )}
           <table className={classes.headerProducts}>
             <tbody>
               <tr>
-                <td className={classes.productAmount}>
-                  <Typography>Qtd</Typography>
+                <td>
+                  <PrintTypography>Qtd</PrintTypography>
                 </td>
-                <td className={classes.product}>
-                  <Typography>Item</Typography>
+                <td>
+                  <PrintTypography>Item</PrintTypography>
                 </td>
               </tr>
             </tbody>
@@ -191,21 +194,21 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
                 {order.products.map((product) => (
                   <tr key={product.id}>
                     <td className={classes.productAmount}>
-                      <Typography>{product.amount}x</Typography>
+                      <PrintTypography>{product.amount}x</PrintTypography>
                     </td>
                     <td className={classes.product}>
-                      <Typography className={classes.productName}>
+                      <PrintTypography upperCase bold>
                         {product.name} - {product.formattedFinalPrice}
-                      </Typography>
+                      </PrintTypography>
                       {product.complement_categories.length > 0 && (
                         <>
                           {product.complement_categories.map((category) => (
                             <Fragment key={category.id}>
                               {category.complements.length > 0 && (
                                 <div className={classes.complementCategory}>
-                                  <Typography variant="body2">
-                                    {category.name}
-                                  </Typography>
+                                  <PrintTypography italic>
+                                    {category.print_name || category.name}
+                                  </PrintTypography>
                                   <Complements complementCategory={category} />
                                 </div>
                               )}
@@ -221,52 +224,54 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
           </div>
           <div className={classes.totals}>
             <div>
-              <Typography>Pagamento</Typography>
+              <PrintTypography>Pagamento</PrintTypography>
             </div>
             <div>
-              <Typography>{order.payment_method.method}</Typography>
+              <PrintTypography>{order.payment_method.method}</PrintTypography>
             </div>
             {order.discount > 0 && (
               <>
                 <div>
-                  <Typography>Desconto</Typography>
+                  <PrintTypography>Desconto</PrintTypography>
                 </div>
                 <div>
-                  <Typography>{order.formattedDiscount}</Typography>
+                  <PrintTypography>{order.formattedDiscount}</PrintTypography>
                 </div>
               </>
             )}
             {order.tax > 0 && (
               <>
                 <div>
-                  <Typography>Taxa de entrega</Typography>
+                  <PrintTypography>Taxa de entrega</PrintTypography>
                 </div>
                 <div>
-                  <Typography>{order.formattedTax}</Typography>
+                  <PrintTypography>{order.formattedTax}</PrintTypography>
                 </div>
               </>
             )}
             {order.change > 0 && (
               <>
                 <div>
-                  <Typography>Troco para</Typography>
+                  <PrintTypography>Troco para</PrintTypography>
                 </div>
                 <div>
-                  <Typography>{order.formattedChangeTo}</Typography>
+                  <PrintTypography>{order.formattedChangeTo}</PrintTypography>
                 </div>
                 <div>
-                  <Typography>Troco</Typography>
+                  <PrintTypography>Troco</PrintTypography>
                 </div>
                 <div>
-                  <Typography>{order.formattedChange}</Typography>
+                  <PrintTypography>{order.formattedChange}</PrintTypography>
                 </div>
               </>
             )}
             <div>
-              <Typography>Total a pagar</Typography>
+              <PrintTypography>Total a pagar</PrintTypography>
             </div>
             <div>
-              <Typography variant="h6">{order.formattedTotal}</Typography>
+              <PrintTypography fontSize={18} bold>
+                {order.formattedTotal}
+              </PrintTypography>
             </div>
             {order.deliverers.length > 0 && (
               <>
@@ -282,6 +287,11 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
                 ))}
               </>
             )}
+          </div>
+          <div className={classes.developer}>
+            <PrintTypography fontSize={12} align="center">
+              www.sgrande.delivery
+            </PrintTypography>
           </div>
         </div>
       )}
