@@ -312,7 +312,7 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
               </table>
             </div>
             <PrintTypography fontSize={12} align="center">
-              www.sgrande.delivery
+              .
             </PrintTypography>
           </div>
         ))}
