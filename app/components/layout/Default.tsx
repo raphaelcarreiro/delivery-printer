@@ -25,6 +25,9 @@ const useStyles = makeStyles((theme) => ({
     [theme.breakpoints.down('md')]: {
       padding: '15px 20px',
     },
+    '@media print': {
+      padding: 0,
+    },
   },
 }));
 

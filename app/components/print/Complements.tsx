@@ -1,16 +1,11 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/styles';
-import { Typography } from '@material-ui/core';
+import PrintTypography from 'components/print-typography/PrintTypography';
 import { ComplementCategory } from '../home/types';
 
 const useStyles = makeStyles({
   ingredient: {
     marginRight: 6,
-  },
-  complementName: {
-    fontSize: 15,
-    display: 'inline',
-    fontWeight: 400,
   },
 });
 
@@ -35,30 +30,30 @@ const OrderProductComplements: React.FC<OrderProductComplementProps> = ({
               : { display: 'inline-flex' }
           }
         >
-          <span className={classes.complementName}>
+          <PrintTypography display="inline">
             {complement.name}
             {index !== complementCategory.complements.length - 1 && ', '}
-          </span>
+          </PrintTypography>
           <div>
             {complement.additional.map((additional) => (
-              <Typography
+              <PrintTypography
                 display="inline"
-                variant="caption"
+                fontSize={10}
                 className={classes.ingredient}
                 key={additional.id}
               >
-                c/ {additional.name}
-              </Typography>
+                {`c/ ${additional.name}`}
+              </PrintTypography>
             ))}
             {complement.ingredients.map((ingredient) => (
-              <Typography
+              <PrintTypography
                 display="inline"
-                variant="caption"
+                fontSize={10}
                 className={classes.ingredient}
                 key={ingredient.id}
               >
-                s/ {ingredient.name}
-              </Typography>
+                {`s/ ${ingredient.name}`}
+              </PrintTypography>
             ))}
           </div>
         </div>

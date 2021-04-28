@@ -67,6 +67,8 @@ interface Shipment {
   formattedScheduledAt: string | null;
   scheduled_at: string | null;
   shipment_method: string;
+  city: string;
+  region: string;
 }
 
 interface Customer {

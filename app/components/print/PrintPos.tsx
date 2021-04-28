@@ -1,28 +1,35 @@
 import React, { useEffect, useState, Fragment } from 'react';
-import { remote } from 'electron';
 import { makeStyles } from '@material-ui/styles';
 import { OrderData, PrinterData } from 'components/home/types';
+import { Typography } from '@material-ui/core';
 import { api } from 'services/api';
-import PrintTypography from 'components/print-typography/PrintTypography';
+import { PosPrintOptions, PosPrintData } from 'electron-pos-printer';
+import { remote } from 'electron';
 import Complements from './Complements';
+
+const { PosPrinter } = remote.require('electron-pos-printer');
 
 const useStyles = makeStyles({
   container: {
-    maxWidth: '80mm',
+    maxWidth: 300,
     padding: '15px 15px 30px 15px',
+    // padding: 15,
     backgroundColor: '#faebd7',
+    fontSize: 14,
     border: '2px dashed #ccc',
+    '& p, span, h6': {
+      fontWeight: 600,
+      color: '#000',
+    },
     '@media print': {
       '&': {
         backgroundColor: 'transparent',
         border: 'none',
-        padding: 0,
-        marginRight: 30,
       },
     },
   },
   products: {
-    padding: '7px 0 0',
+    padding: '10px 0 0',
     borderTop: '1px dashed #333',
   },
   complement: {
@@ -35,7 +42,12 @@ const useStyles = makeStyles({
     marginRight: 6,
   },
   headerProducts: {
-    marginTop: 7,
+    marginTop: 15,
+  },
+  productName: {
+    textTransform: 'uppercase',
+    fontSize: 16,
+    fontWeight: 600,
   },
   product: {
     width: '100%',
@@ -44,16 +56,15 @@ const useStyles = makeStyles({
   productAmount: {
     minWidth: 25,
     paddingBottom: 10,
-    display: 'flex',
-    paddingTop: 0,
+  },
+  title: {
+    fontWeight: 600,
+    marginBottom: 10,
   },
   complementCategory: {
     display: 'grid',
     gridTemplateColumns: '0.5fr 1fr',
-  },
-  additionalInfoContainer: {
-    display: 'flex',
-    flexWrap: 'wrap',
+    alignItems: 'center',
   },
 });
 
@@ -62,7 +73,7 @@ interface PrintProps {
   order: OrderData;
 }
 
-const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
+const PrintPos: React.FC<PrintProps> = ({ handleClose, order }) => {
   const classes = useStyles();
   const [printers, setPrinters] = useState<PrinterData[]>([]);
   const [toPrint, setToPrint] = useState<PrinterData[]>([]);
@@ -131,72 +142,59 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
 
   // print
   useEffect(() => {
-    if (toPrint.length > 0) {
-      const [win] = remote.BrowserWindow.getAllWindows();
-      const [printing] = toPrint;
+    if (!toPrint.length) return;
+    const [printing] = toPrint;
 
-      if (!win) return;
+    const options: PosPrintOptions = {
+      preview: false,
+      width: '80mm',
+      margin: '0 0 0 0',
+      copies: 1,
+      printerName: printing.name,
+      timeOutPerLine: 2000,
+      pageSize: { height: 301000, width: 80000 },
+      silent: true,
+    };
 
-      let error = false;
+    const data: PosPrintData[] = [
+      {
+        type: 'text',
+        value: `PEDIDO ${order.formattedId}`,
+        css: { 'font-weight': '700', 'font-size': '18px' },
+      },
+      {
+        type: 'text',
+        value: order.formattedDate,
+        css: { 'font-size': '18px' },
+      },
+      {
+        type: 'text',
+        value: order.customer.name,
+        css: { 'font-size': '18px' },
+      },
+      {
+        type: 'text',
+        value: `${order.shipment.address}, ${order.shipment.number}, ${order.shipment.district}`,
+        css: { 'font-size': '18px' },
+      },
+      {
+        type: 'text',
+        value: `.`,
+      },
+    ];
 
-      try {
-        win.webContents.print(
-          {
-            deviceName: printing.name,
-            color: false,
-            collate: false,
-            copies: 1,
-            silent: true,
-            margins: {
-              marginType: 'none',
-            },
-          },
-          (success) => {
-            if (success) {
-              setPrinters((oldPrinters) =>
-                oldPrinters.map((p) => {
-                  if (p.id === printing.id) p.printed = true;
-                  return p;
-                })
-              );
-            }
-          }
+    PosPrinter.print(data, options)
+      .then(() => {
+        setPrinters((oldPrinters) =>
+          oldPrinters.map((p) => {
+            if (p.id === printing.id) p.printed = true;
+            return p;
+          })
         );
-      } catch (err) {
-        console.log(err);
-        error = true;
-      }
-
-      // try to print in default printer
-      if (error) {
-        try {
-          win.webContents.print(
-            {
-              color: false,
-              collate: false,
-              copies: 1,
-              silent: true,
-              margins: {
-                marginType: 'none',
-              },
-            },
-            (success) => {
-              if (success) {
-                setPrinters((oldPrinters) =>
-                  oldPrinters.map((p) => {
-                    if (p.id === printing.id) p.printed = true;
-                    return p;
-                  })
-                );
-              }
-            }
-          );
-        } catch (err) {
-          console.log(err);
-          handleClose();
-        }
-      }
-    }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   }, [toPrint, handleClose]);
 
   return (
@@ -204,38 +202,35 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
       {toPrint.length > 0 &&
         toPrint.map((printer) => (
           <div className={classes.container} key={printer.id}>
-            <PrintTypography fontSize={20} bold gutterBottom>
+            <Typography variant="h6" className={classes.title} gutterBottom>
               PEDIDO {order.formattedId}
-            </PrintTypography>
-            <PrintTypography>{order.formattedDate}</PrintTypography>
-            <PrintTypography gutterBottom>
-              {order.customer.name}
-            </PrintTypography>
+            </Typography>
+            <Typography>{order.formattedDate}</Typography>
+            <Typography gutterBottom>{order.customer.name}</Typography>
             {order.shipment.shipment_method === 'delivery' && (
-              <PrintTypography>
-                {`${order.shipment.address}, ${order.shipment.number},
-                ${order.shipment.district}, ${order.shipment.city},
-                ${order.shipment.region}`}
-              </PrintTypography>
+              <Typography variant="body2">
+                {order.shipment.address}, {order.shipment.number},{' '}
+                {order.shipment.district}
+              </Typography>
             )}
             {order.shipment.shipment_method === 'customer_collect' &&
             !order.shipment.scheduled_at ? (
-              <PrintTypography>**Cliente retira**</PrintTypography>
+              <Typography>**Cliente retira**</Typography>
             ) : (
               order.shipment.scheduled_at && (
-                <PrintTypography>
+                <Typography>
                   **Cliente retira ás {order.shipment.formattedScheduledAt}**
-                </PrintTypography>
+                </Typography>
               )
             )}
             <table className={classes.headerProducts}>
               <tbody>
                 <tr>
-                  <td>
-                    <PrintTypography>Qtd</PrintTypography>
+                  <td style={{ minWidth: 30 }}>
+                    <Typography>Qtd</Typography>
                   </td>
                   <td>
-                    <PrintTypography>Item</PrintTypography>
+                    <Typography>Item</Typography>
                   </td>
                 </tr>
               </tbody>
@@ -246,56 +241,54 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
                   {printer.order.products.map((product) => (
                     <tr key={product.id}>
                       <td className={classes.productAmount}>
-                        <PrintTypography>{product.amount}x</PrintTypography>
+                        <Typography>{product.amount}x</Typography>
                       </td>
                       <td className={classes.product}>
-                        <PrintTypography fontSize={16} upperCase bold>
+                        <Typography className={classes.productName}>
                           {product.name}
-                        </PrintTypography>
+                        </Typography>
                         {product.annotation && (
-                          <PrintTypography fontSize={12}>
+                          <Typography variant="body2">
                             Obs: {product.annotation}
-                          </PrintTypography>
+                          </Typography>
                         )}
-                        <div className={classes.additionalInfoContainer}>
-                          {product.additional.length > 0 && (
-                            <>
-                              {product.additional.map((additional) => (
-                                <PrintTypography
-                                  display="inline"
-                                  fontSize={14}
-                                  className={classes.additional}
-                                  key={additional.id}
-                                >
-                                  {`c/ ${additional.amount}x ${additional.name}`}
-                                </PrintTypography>
-                              ))}
-                            </>
-                          )}
-                          {product.ingredients.length > 0 && (
-                            <>
-                              {product.ingredients.map((ingredient) => (
-                                <PrintTypography
-                                  display="inline"
-                                  fontSize={14}
-                                  className={classes.ingredient}
-                                  key={ingredient.id}
-                                >
-                                  {`s/ ${ingredient.name}`}
-                                </PrintTypography>
-                              ))}
-                            </>
-                          )}
-                        </div>
+                        {product.additional.length > 0 && (
+                          <>
+                            {product.additional.map((additional) => (
+                              <Typography
+                                display="inline"
+                                variant="body2"
+                                className={classes.additional}
+                                key={additional.id}
+                              >
+                                c/ {additional.amount}x {additional.name}
+                              </Typography>
+                            ))}
+                          </>
+                        )}
+                        {product.ingredients.length > 0 && (
+                          <>
+                            {product.ingredients.map((ingredient) => (
+                              <Typography
+                                display="inline"
+                                variant="body2"
+                                className={classes.ingredient}
+                                key={ingredient.id}
+                              >
+                                s/ {ingredient.name}
+                              </Typography>
+                            ))}
+                          </>
+                        )}
                         {product.complement_categories.length > 0 && (
                           <>
                             {product.complement_categories.map((category) => (
                               <Fragment key={category.id}>
                                 {category.complements.length > 0 && (
                                   <div className={classes.complementCategory}>
-                                    <PrintTypography italic>
+                                    <Typography variant="body2">
                                       {category.print_name || category.name}
-                                    </PrintTypography>
+                                    </Typography>
                                     <Complements
                                       complementCategory={category}
                                     />
@@ -311,13 +304,10 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
                 </tbody>
               </table>
             </div>
-            <PrintTypography fontSize={12} align="center">
-              .
-            </PrintTypography>
           </div>
         ))}
     </>
   );
 };
 
-export default Print;
+export default PrintPos;

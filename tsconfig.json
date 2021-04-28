@@ -21,7 +21,8 @@
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "allowJs": true,
-    "baseUrl": "./app/"
+    "baseUrl": "./app/",
+    "noImplicitAny": false
   },
   "include": ["app"],
   "exclude": [
