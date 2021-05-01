@@ -2,7 +2,6 @@ import React, { useEffect, useState, Fragment } from 'react';
 import { remote } from 'electron';
 import { makeStyles } from '@material-ui/styles';
 import { OrderData } from 'components/home/types';
-import { Typography } from '@material-ui/core';
 import PrintTypography from 'components/print-typography/PrintTypography';
 import Complements from './Complements';
 
@@ -70,7 +69,7 @@ const useStyles = makeStyles({
   },
   totals: {
     display: 'grid',
-    gridTemplateColumns: '100px 1fr',
+    gridTemplateColumns: '115px 1fr',
     rowGap: '4px',
     '& div': {
       display: 'flex',
@@ -278,10 +277,10 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
                 {order.deliverers.map((deliverer) => (
                   <Fragment key={deliverer.id}>
                     <div>
-                      <Typography>Entregador</Typography>
+                      <PrintTypography>Entregador</PrintTypography>
                     </div>
                     <div>
-                      <Typography>{deliverer.name}</Typography>
+                      <PrintTypography>{deliverer.name}</PrintTypography>
                     </div>
                   </Fragment>
                 ))}

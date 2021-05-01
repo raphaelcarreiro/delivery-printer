@@ -13,6 +13,7 @@ import { api } from 'services/api';
 import Shipment from 'components/print/Shipment';
 import PrintByProduct from 'components/print/PrintByProduct';
 import Print from 'components/print/Print';
+import PrintOnlyShipment from 'components/print/PrintOnlyShipment';
 import { moneyFormat } from '../../helpers/NumberFormat';
 import { OrderData } from './types';
 import Status from './Status';
@@ -126,10 +127,11 @@ export default function Home(): JSX.Element {
         setOrders((oldOrders) => [...oldOrders, formattedOrder]);
       });
 
-      socket.on('printShipment', (order: OrderData) => {
-        const formattedOrder = formatOrder(order);
-        setShipment(formattedOrder);
-      });
+      if (!restaurant.configs.print_only_shipment)
+        socket.on('printShipment', (order: OrderData) => {
+          const formattedOrder = formatOrder(order);
+          setShipment(formattedOrder);
+        });
 
       socket.on('handleRestaurantState', (response: { isOpen: boolean }) => {
         dispatch(setRestaurantIsOpen(response.isOpen));
@@ -163,24 +165,22 @@ export default function Home(): JSX.Element {
     });
   }
 
+  if (loading) return <InsideLoading />;
+
   return (
     <>
-      {loading ? (
-        <InsideLoading />
+      {toPrint && !toPrint.printed ? (
+        restaurant.configs.print_by_product ? (
+          <PrintByProduct handleClose={handleOrderClose} order={toPrint} />
+        ) : restaurant.configs.print_only_shipment ? (
+          <PrintOnlyShipment order={toPrint} handleClose={handleOrderClose} />
+        ) : (
+          <Print handleClose={handleOrderClose} order={toPrint} />
+        )
+      ) : shipment && !shipment.printed ? (
+        <Shipment order={shipment} handleClose={handleShipmentClose} />
       ) : (
-        <>
-          {toPrint && !toPrint.printed ? (
-            restaurant.configs.print_by_product ? (
-              <PrintByProduct handleClose={handleOrderClose} order={toPrint} />
-            ) : (
-              <Print handleClose={handleOrderClose} order={toPrint} />
-            )
-          ) : shipment && !shipment.printed ? (
-            <Shipment order={shipment} handleClose={handleShipmentClose} />
-          ) : (
-            <Status wsConnected={wsConnected} handleLogout={handleLogout} />
-          )}
-        </>
+        <Status wsConnected={wsConnected} handleLogout={handleLogout} />
       )}
     </>
   );

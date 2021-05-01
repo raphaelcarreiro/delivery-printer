@@ -1,8 +1,8 @@
 import { RestaurantActionTypes, SET_RESTAURANT, SET_IS_OPEN } from './types';
 
 export interface RestaurantConfigs {
-  realtime_print: boolean;
   print_by_product: boolean;
+  print_only_shipment: boolean;
 }
 export interface RestaurantState {
   id: number;
