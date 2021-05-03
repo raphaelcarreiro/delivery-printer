@@ -8,12 +8,13 @@ interface StyledPrintTypographyProps {
   gutterBottom: boolean;
   upperCase: boolean;
   italic: boolean;
+  noWrap?: boolean;
 }
 
 export const StyledPrintTypography = styled.p<StyledPrintTypographyProps>`
   font-weight: 400;
-  font-size: ${(props) => (props.fontSize ? props.fontSize : 14)}px;
-  line-height: 18px;
+  font-size: ${(props) => (props.fontSize ? `${props.fontSize}em` : '1em')};
+  line-height: 1.2em;
   color: #000;
   font-family: sans-serif;
 
@@ -52,4 +53,12 @@ export const StyledPrintTypography = styled.p<StyledPrintTypographyProps>`
     css`
       font-style: italic;
     `}
+
+    ${(props) =>
+      props.noWrap &&
+      css`
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      `}
 `;

@@ -10,6 +10,7 @@ const useStyles = makeStyles({
     maxWidth: '80mm',
     minHeight: 300,
     padding: 15,
+    fontSize: 14,
     backgroundColor: '#faebd7',
     border: '2px dashed #ccc',
     '@media print': {
@@ -53,8 +54,9 @@ const useStyles = makeStyles({
   },
   customerData: {
     display: 'grid',
-    gridTemplateColumns: '70px 1fr',
+    gridTemplateColumns: '75px 1fr',
     marginBottom: 2,
+    columnGap: 7,
   },
   title: {
     fontWeight: 600,
@@ -69,7 +71,7 @@ const useStyles = makeStyles({
   },
   totals: {
     display: 'grid',
-    gridTemplateColumns: '115px 1fr',
+    gridTemplateColumns: '1.5fr 1fr',
     rowGap: '4px',
     '& div': {
       display: 'flex',
@@ -100,6 +102,7 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
     }
   }, [order]);
 
+  /*
   useEffect(() => {
     if (toPrint) {
       // fecha se o pedido já foi impresso
@@ -136,12 +139,13 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
       }
     }
   }, [toPrint, handleClose]);
+  */
 
   return (
     <>
       {toPrint && !toPrint.printed && (
         <div className={classes.container}>
-          <PrintTypography fontSize={20} bold gutterBottom>
+          <PrintTypography fontSize={1.2} bold gutterBottom>
             PEDIDO {order.formattedId}
           </PrintTypography>
           <PrintTypography gutterBottom>{order.formattedDate}</PrintTypography>
@@ -156,16 +160,16 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
             )
           )}
           <div className={classes.customerData}>
-            <PrintTypography>Cliente</PrintTypography>
+            <PrintTypography noWrap>Cliente</PrintTypography>
             <PrintTypography>{order.customer.name}</PrintTypography>
           </div>
           <div className={classes.customerData}>
-            <PrintTypography>Telefone</PrintTypography>
+            <PrintTypography noWrap>Telefone</PrintTypography>
             <PrintTypography>{order.customer.phone}</PrintTypography>
           </div>
           {order.shipment.shipment_method === 'delivery' && (
             <div className={classes.customerData}>
-              <PrintTypography>Endereço</PrintTypography>
+              <PrintTypography noWrap>Endereço</PrintTypography>
               <div>
                 <PrintTypography>
                   {`${order.shipment.address}, nº ${order.shipment.number}`}
@@ -268,7 +272,7 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
               <PrintTypography>Total a pagar</PrintTypography>
             </div>
             <div>
-              <PrintTypography fontSize={18} bold>
+              <PrintTypography fontSize={1.2} bold>
                 {order.formattedTotal}
               </PrintTypography>
             </div>
@@ -288,7 +292,7 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
             )}
           </div>
           <div className={classes.developer}>
-            <PrintTypography fontSize={12} align="center">
+            <PrintTypography fontSize={0.9} align="center">
               www.sgrande.delivery
             </PrintTypography>
           </div>

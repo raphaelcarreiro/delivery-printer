@@ -9,6 +9,7 @@ interface PrintTypographyProps extends HTMLAttributes<HTMLParagraphElement> {
   gutterBottom?: boolean;
   upperCase?: boolean;
   italic?: boolean;
+  noWrap?: boolean;
 }
 
 const PrintTypography: React.FC<PrintTypographyProps> = ({
