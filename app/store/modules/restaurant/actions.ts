@@ -1,8 +1,8 @@
-import { RestaurantState } from './reducer';
+import { Restaurant } from './reducer';
 import { SET_RESTAURANT, RestaurantActionTypes } from './types';
 
 export function setRestaurant(
-  restaurant: RestaurantState
+  restaurant: Restaurant | null
 ): RestaurantActionTypes {
   return {
     type: SET_RESTAURANT,

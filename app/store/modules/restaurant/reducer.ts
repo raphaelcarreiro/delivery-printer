@@ -4,7 +4,13 @@ export interface RestaurantConfigs {
   print_by_product: boolean;
   print_only_shipment: boolean;
 }
-export interface RestaurantState {
+
+export interface PrinterSetting {
+  font_size: number;
+  production_template_copies: number;
+  shipment_template_copies: number;
+}
+export interface Restaurant {
   id: number;
   is_open: boolean;
   name: string;
@@ -26,26 +32,32 @@ export interface RestaurantState {
   cover_id: number;
   working_hours: string;
   configs: RestaurantConfigs;
+  printer_setting: PrinterSetting;
 }
 
-const INITIAL_STATE: RestaurantState = {} as RestaurantState;
+const INITIAL_STATE: Restaurant | null = null;
 
 export default function restaurant(
   state = INITIAL_STATE,
   action: RestaurantActionTypes
-): RestaurantState {
+): Restaurant | null {
   switch (action.type) {
     case SET_RESTAURANT: {
+      if (!action.restaurant) return null;
+
       return {
         ...action.restaurant,
       };
     }
     case SET_IS_OPEN: {
+      if (!state) return null;
+
       return {
         ...state,
         is_open: action.isOpen,
       };
     }
+
     default: {
       return state;
     }

@@ -107,36 +107,36 @@ export default function Home(): JSX.Element {
       setWsConnected(socket.connected);
     }, 2000);
 
-    if (restaurant.id) {
-      if (socket.disconnected) socket.connect();
-      setWsConnected(socket.connected);
+    if (!restaurant) return;
 
+    if (socket.disconnected) socket.connect();
+    setWsConnected(socket.connected);
+
+    socket.emit('register', restaurant.id);
+
+    socket.on('reconnect', () => {
       socket.emit('register', restaurant.id);
+    });
 
-      socket.on('reconnect', () => {
-        socket.emit('register', restaurant.id);
-      });
+    socket.on('stored', (order: OrderData) => {
+      const formattedOrder = formatOrder(order);
+      setOrders((oldOrders) => [...oldOrders, formattedOrder]);
+    });
 
-      socket.on('stored', (order: OrderData) => {
+    socket.on('printOrder', (order: OrderData) => {
+      const formattedOrder = formatOrder(order);
+      setOrders((oldOrders) => [...oldOrders, formattedOrder]);
+    });
+
+    if (!restaurant.configs.print_only_shipment)
+      socket.on('printShipment', (order: OrderData) => {
         const formattedOrder = formatOrder(order);
-        setOrders((oldOrders) => [...oldOrders, formattedOrder]);
+        setShipment(formattedOrder);
       });
 
-      socket.on('printOrder', (order: OrderData) => {
-        const formattedOrder = formatOrder(order);
-        setOrders((oldOrders) => [...oldOrders, formattedOrder]);
-      });
-
-      if (!restaurant.configs.print_only_shipment)
-        socket.on('printShipment', (order: OrderData) => {
-          const formattedOrder = formatOrder(order);
-          setShipment(formattedOrder);
-        });
-
-      socket.on('handleRestaurantState', (response: { isOpen: boolean }) => {
-        dispatch(setRestaurantIsOpen(response.isOpen));
-      });
-    }
+    socket.on('handleRestaurantState', (response: { isOpen: boolean }) => {
+      dispatch(setRestaurantIsOpen(response.isOpen));
+    });
 
     return () => {
       clearInterval(timer);
@@ -170,9 +170,9 @@ export default function Home(): JSX.Element {
   return (
     <>
       {toPrint && !toPrint.printed ? (
-        restaurant.configs.print_by_product ? (
+        restaurant?.configs.print_by_product ? (
           <PrintByProduct handleClose={handleOrderClose} order={toPrint} />
-        ) : restaurant.configs.print_only_shipment ? (
+        ) : restaurant?.configs.print_only_shipment ? (
           <PrintOnlyShipment order={toPrint} handleClose={handleOrderClose} />
         ) : (
           <Print handleClose={handleOrderClose} order={toPrint} />

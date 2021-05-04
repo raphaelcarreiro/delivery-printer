@@ -1,36 +1,35 @@
 import React, { useEffect, useState, Fragment } from 'react';
 import { remote } from 'electron';
 import { makeStyles } from '@material-ui/styles';
-import {
-  OrderData,
-  PrinterData,
-  ProductPrinterData,
-} from 'components/home/types';
-import { Typography } from '@material-ui/core';
+import { OrderData, ProductPrinterData } from 'components/home/types';
 import { api } from 'services/api';
+import PrintTypography from 'components/print-typography/PrintTypography';
+import { Theme } from '@material-ui/core';
+import { useSelector } from 'store';
 import Complements from './Complements';
 
-const useStyles = makeStyles({
-  container: {
-    maxWidth: 300,
+interface UseStylesProps {
+  fontSize: number;
+}
+
+const useStyles = makeStyles<Theme, UseStylesProps>({
+  container: (props) => ({
+    maxWidth: '80mm',
     padding: '15px 15px 30px 15px',
-    // padding: 15,
     backgroundColor: '#faebd7',
-    fontSize: 14,
     border: '2px dashed #ccc',
-    '& p, span, h6': {
-      fontWeight: 600,
-      color: '#000',
-    },
+    fontSize: props.fontSize,
     '@media print': {
       '&': {
         backgroundColor: 'transparent',
         border: 'none',
+        padding: 0,
+        marginRight: 30,
       },
     },
-  },
+  }),
   products: {
-    padding: '10px 0 0',
+    padding: '7px 0 0',
     borderTop: '1px dashed #333',
   },
   complement: {
@@ -43,12 +42,7 @@ const useStyles = makeStyles({
     marginRight: 6,
   },
   headerProducts: {
-    marginTop: 15,
-  },
-  productName: {
-    textTransform: 'uppercase',
-    fontSize: 16,
-    fontWeight: 600,
+    marginTop: 7,
   },
   product: {
     width: '100%',
@@ -57,15 +51,16 @@ const useStyles = makeStyles({
   productAmount: {
     minWidth: 25,
     paddingBottom: 10,
-  },
-  title: {
-    fontWeight: 600,
-    marginBottom: 10,
+    display: 'flex',
+    paddingTop: 0,
   },
   complementCategory: {
     display: 'grid',
     gridTemplateColumns: '0.5fr 1fr',
-    alignItems: 'center',
+  },
+  additionalInfoContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
   },
 });
 
@@ -75,7 +70,12 @@ interface PrintProps {
 }
 
 const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
-  const classes = useStyles();
+  const restaurant = useSelector((state) => state.restaurant);
+
+  const classes = useStyles({
+    fontSize: restaurant?.printer_setting.font_size || 14,
+  });
+
   const [products, setProducts] = useState<ProductPrinterData[]>([]);
   const [toPrint, setToPrint] = useState<ProductPrinterData[]>([]);
 
@@ -223,35 +223,38 @@ const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
       {toPrint.length > 0 &&
         toPrint.map((printer) => (
           <div className={classes.container} key={printer.id}>
-            <Typography variant="h6" className={classes.title} gutterBottom>
+            <PrintTypography fontSize={1.2} bold gutterBottom>
               PEDIDO {order.formattedId}
-            </Typography>
-            <Typography>{order.formattedDate}</Typography>
-            <Typography gutterBottom>{order.customer.name}</Typography>
+            </PrintTypography>
+            <PrintTypography>{order.formattedDate}</PrintTypography>
+            <PrintTypography gutterBottom>
+              {order.customer.name}
+            </PrintTypography>
             {order.shipment.shipment_method === 'delivery' && (
-              <Typography variant="body2">
-                {order.shipment.address}, {order.shipment.number},{' '}
-                {order.shipment.district}
-              </Typography>
+              <PrintTypography>
+                {`${order.shipment.address}, ${order.shipment.number},
+                ${order.shipment.district}, ${order.shipment.city},
+                ${order.shipment.region}`}
+              </PrintTypography>
             )}
             {order.shipment.shipment_method === 'customer_collect' &&
             !order.shipment.scheduled_at ? (
-              <Typography>**Cliente retira**</Typography>
+              <PrintTypography>**Cliente retira**</PrintTypography>
             ) : (
               order.shipment.scheduled_at && (
-                <Typography>
+                <PrintTypography>
                   **Cliente retira ás {order.shipment.formattedScheduledAt}**
-                </Typography>
+                </PrintTypography>
               )
             )}
             <table className={classes.headerProducts}>
               <tbody>
                 <tr>
-                  <td style={{ minWidth: 30 }}>
-                    <Typography>Qtd</Typography>
+                  <td>
+                    <PrintTypography>Qtd</PrintTypography>
                   </td>
                   <td>
-                    <Typography>Item</Typography>
+                    <PrintTypography>Item</PrintTypography>
                   </td>
                 </tr>
               </tbody>
@@ -262,56 +265,54 @@ const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
                   {printer.order.products.map((product) => (
                     <tr key={product.id}>
                       <td className={classes.productAmount}>
-                        <Typography>
-                          {printer.currentAmount}/{product.amount}
-                        </Typography>
+                        <PrintTypography>{product.amount}x</PrintTypography>
                       </td>
                       <td className={classes.product}>
-                        <Typography className={classes.productName}>
+                        <PrintTypography upperCase bold>
                           {product.name}
-                        </Typography>
+                        </PrintTypography>
                         {product.annotation && (
-                          <Typography variant="body2">
+                          <PrintTypography fontSize={0.8}>
                             Obs: {product.annotation}
-                          </Typography>
+                          </PrintTypography>
                         )}
-                        {product.additional.length > 0 && (
-                          <>
-                            {product.additional.map((additional) => (
-                              <Typography
-                                display="inline"
-                                variant="body2"
-                                className={classes.additional}
-                                key={additional.id}
-                              >
-                                c/ {additional.name}
-                              </Typography>
-                            ))}
-                          </>
-                        )}
-                        {product.ingredients.length > 0 && (
-                          <>
-                            {product.ingredients.map((ingredient) => (
-                              <Typography
-                                display="inline"
-                                variant="body2"
-                                className={classes.ingredient}
-                                key={ingredient.id}
-                              >
-                                s/ {ingredient.name}
-                              </Typography>
-                            ))}
-                          </>
-                        )}
+                        <div className={classes.additionalInfoContainer}>
+                          {product.additional.length > 0 && (
+                            <>
+                              {product.additional.map((additional) => (
+                                <PrintTypography
+                                  display="inline"
+                                  className={classes.additional}
+                                  key={additional.id}
+                                >
+                                  {`c/ ${additional.amount}x ${additional.name}`}
+                                </PrintTypography>
+                              ))}
+                            </>
+                          )}
+                          {product.ingredients.length > 0 && (
+                            <>
+                              {product.ingredients.map((ingredient) => (
+                                <PrintTypography
+                                  display="inline"
+                                  className={classes.ingredient}
+                                  key={ingredient.id}
+                                >
+                                  {`s/ ${ingredient.name}`}
+                                </PrintTypography>
+                              ))}
+                            </>
+                          )}
+                        </div>
                         {product.complement_categories.length > 0 && (
                           <>
                             {product.complement_categories.map((category) => (
                               <Fragment key={category.id}>
                                 {category.complements.length > 0 && (
                                   <div className={classes.complementCategory}>
-                                    <Typography variant="body2">
+                                    <PrintTypography italic>
                                       {category.print_name || category.name}
-                                    </Typography>
+                                    </PrintTypography>
                                     <Complements
                                       complementCategory={category}
                                     />
@@ -327,6 +328,7 @@ const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
                 </tbody>
               </table>
             </div>
+            <PrintTypography align="center">.</PrintTypography>
           </div>
         ))}
     </>

@@ -38,7 +38,7 @@ interface RestaurantStatusProps {
 
 const RestaurantStatus: React.FC<RestaurantStatusProps> = ({ wsConnected }) => {
   const restaurant = useSelector((state) => state.restaurant);
-  const classes = useStyles({ restaurantIsOpen: restaurant.is_open || false });
+  const classes = useStyles({ restaurantIsOpen: restaurant?.is_open || false });
 
   return (
     <>
@@ -46,7 +46,7 @@ const RestaurantStatus: React.FC<RestaurantStatusProps> = ({ wsConnected }) => {
         <div className={classes.statusContainer}>
           <Typography color="inherit" className={classes.status}>
             <MdFiberManualRecord />
-            {restaurant.is_open ? 'Online' : 'Offline'}
+            {restaurant?.is_open ? 'Online' : 'Offline'}
           </Typography>
         </div>
       ) : (

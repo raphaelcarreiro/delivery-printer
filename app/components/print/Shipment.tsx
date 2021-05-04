@@ -3,14 +3,20 @@ import { remote } from 'electron';
 import { makeStyles } from '@material-ui/styles';
 import { OrderData } from 'components/home/types';
 import PrintTypography from 'components/print-typography/PrintTypography';
+import { useSelector } from 'store';
+import { Theme } from '@material-ui/core';
 import Complements from './Complements';
 
-const useStyles = makeStyles({
-  container: {
+interface UseStylesProps {
+  fontSize: number;
+}
+
+const useStyles = makeStyles<Theme, UseStylesProps>({
+  container: (props) => ({
     maxWidth: '80mm',
     minHeight: 300,
     padding: 15,
-    fontSize: 14,
+    fontSize: props.fontSize,
     backgroundColor: '#faebd7',
     border: '2px dashed #ccc',
     '@media print': {
@@ -21,7 +27,7 @@ const useStyles = makeStyles({
         marginRight: 30,
       },
     },
-  },
+  }),
   annotation: {
     marginLeft: 10,
   },
@@ -89,7 +95,11 @@ interface PrintProps {
 }
 
 const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
-  const classes = useStyles();
+  const restaurant = useSelector((state) => state.restaurant);
+
+  const classes = useStyles({
+    fontSize: restaurant ? restaurant.printer_setting.font_size : 14,
+  });
   const [toPrint, setToPrint] = useState<OrderData | null>(null);
 
   // get product printers
@@ -102,8 +112,9 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
     }
   }, [order]);
 
-  /*
   useEffect(() => {
+    if (!restaurant) return;
+
     if (toPrint) {
       // fecha se o pedido já foi impresso
       if (toPrint.printed) {
@@ -119,7 +130,7 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
           {
             color: false,
             collate: false,
-            copies: 1,
+            copies: restaurant.printer_setting.shipment_template_copies,
             silent: true,
             margins: {
               marginType: 'none',
@@ -138,8 +149,7 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
         handleClose();
       }
     }
-  }, [toPrint, handleClose]);
-  */
+  }, [toPrint, handleClose, restaurant]);
 
   return (
     <>

@@ -4,14 +4,21 @@ import { makeStyles } from '@material-ui/styles';
 import { OrderData, PrinterData } from 'components/home/types';
 import { api } from 'services/api';
 import PrintTypography from 'components/print-typography/PrintTypography';
+import { Theme } from '@material-ui/core';
+import { useSelector } from 'store';
 import Complements from './Complements';
 
-const useStyles = makeStyles({
-  container: {
+interface UseStylesProps {
+  fontSize: number;
+}
+
+const useStyles = makeStyles<Theme, UseStylesProps>({
+  container: (props) => ({
     maxWidth: '80mm',
     padding: '15px 15px 30px 15px',
     backgroundColor: '#faebd7',
     border: '2px dashed #ccc',
+    fontSize: props.fontSize,
     '@media print': {
       '&': {
         backgroundColor: 'transparent',
@@ -20,7 +27,7 @@ const useStyles = makeStyles({
         marginRight: 30,
       },
     },
-  },
+  }),
   products: {
     padding: '7px 0 0',
     borderTop: '1px dashed #333',
@@ -63,7 +70,12 @@ interface PrintProps {
 }
 
 const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
-  const classes = useStyles();
+  const restaurant = useSelector((state) => state.restaurant);
+
+  const classes = useStyles({
+    fontSize: restaurant?.printer_setting.font_size || 14,
+  });
+
   const [printers, setPrinters] = useState<PrinterData[]>([]);
   const [toPrint, setToPrint] = useState<PrinterData[]>([]);
 
@@ -131,6 +143,8 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
 
   // print
   useEffect(() => {
+    if (!restaurant) return;
+
     if (toPrint.length > 0) {
       const [win] = remote.BrowserWindow.getAllWindows();
       const [printing] = toPrint;
@@ -145,7 +159,7 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
             deviceName: printing.name,
             color: false,
             collate: false,
-            copies: 1,
+            copies: restaurant.printer_setting.production_template_copies,
             silent: true,
             margins: {
               marginType: 'none',
@@ -174,7 +188,7 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
             {
               color: false,
               collate: false,
-              copies: 1,
+              copies: restaurant.printer_setting.production_template_copies,
               silent: true,
               margins: {
                 marginType: 'none',
@@ -197,14 +211,14 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
         }
       }
     }
-  }, [toPrint, handleClose]);
+  }, [toPrint, handleClose, restaurant]);
 
   return (
     <>
       {toPrint.length > 0 &&
         toPrint.map((printer) => (
           <div className={classes.container} key={printer.id}>
-            <PrintTypography fontSize={20} bold gutterBottom>
+            <PrintTypography fontSize={1.2} bold gutterBottom>
               PEDIDO {order.formattedId}
             </PrintTypography>
             <PrintTypography>{order.formattedDate}</PrintTypography>
@@ -249,11 +263,11 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
                         <PrintTypography>{product.amount}x</PrintTypography>
                       </td>
                       <td className={classes.product}>
-                        <PrintTypography fontSize={16} upperCase bold>
+                        <PrintTypography upperCase bold>
                           {product.name}
                         </PrintTypography>
                         {product.annotation && (
-                          <PrintTypography fontSize={12}>
+                          <PrintTypography fontSize={0.8}>
                             Obs: {product.annotation}
                           </PrintTypography>
                         )}
@@ -263,7 +277,6 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
                               {product.additional.map((additional) => (
                                 <PrintTypography
                                   display="inline"
-                                  fontSize={14}
                                   className={classes.additional}
                                   key={additional.id}
                                 >
@@ -277,7 +290,6 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
                               {product.ingredients.map((ingredient) => (
                                 <PrintTypography
                                   display="inline"
-                                  fontSize={14}
                                   className={classes.ingredient}
                                   key={ingredient.id}
                                 >
@@ -311,9 +323,7 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
                 </tbody>
               </table>
             </div>
-            <PrintTypography fontSize={12} align="center">
-              .
-            </PrintTypography>
+            <PrintTypography align="center">.</PrintTypography>
           </div>
         ))}
     </>

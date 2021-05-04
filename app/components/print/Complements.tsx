@@ -38,7 +38,6 @@ const OrderProductComplements: React.FC<OrderProductComplementProps> = ({
             {complement.additional.map((additional) => (
               <PrintTypography
                 display="inline"
-                fontSize={10}
                 className={classes.ingredient}
                 key={additional.id}
               >
@@ -48,7 +47,6 @@ const OrderProductComplements: React.FC<OrderProductComplementProps> = ({
             {complement.ingredients.map((ingredient) => (
               <PrintTypography
                 display="inline"
-                fontSize={10}
                 className={classes.ingredient}
                 key={ingredient.id}
               >

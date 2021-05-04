@@ -4,7 +4,6 @@ import { setRestaurant } from 'store/modules/restaurant/actions';
 import { setUser } from 'store/modules/user/actions';
 import { api } from 'services/api';
 import jwt from 'jsonwebtoken';
-import { RestaurantState } from 'store/modules/restaurant/reducer';
 import constants from 'constants/url';
 
 type AuthenticatedData = {
@@ -74,7 +73,7 @@ const AuthProvider: React.FC = ({ children }) => {
         .post('/logout')
         .then(() => {
           localStorage.removeItem('token');
-          dispatch(setRestaurant({} as RestaurantState));
+          dispatch(setRestaurant(null));
           resolve(true);
         })
         .catch((err) => {

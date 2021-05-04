@@ -43,7 +43,7 @@ const Status: React.FC<StatusProps> = ({ wsConnected, handleLogout }) => {
 
   return (
     <div className={classes.container}>
-      <Typography variant="h4">{restaurant.name}</Typography>
+      <Typography variant="h4">{restaurant?.name}</Typography>
       <Typography variant="body1" color="textSecondary">
         {user.name}
       </Typography>
