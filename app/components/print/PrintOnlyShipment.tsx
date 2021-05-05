@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState, Fragment, useMemo } from 'react';
 import { remote } from 'electron';
 import { makeStyles } from '@material-ui/styles';
 import { OrderData, PrinterData } from 'components/home/types';
@@ -105,6 +105,10 @@ const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
   const [toPrint, setToPrint] = useState<PrinterData[]>([]);
   const [printedQuantity, setPrintedQuantity] = useState(0);
 
+  const copies = useMemo(() => {
+    return restaurant?.printer_setting.shipment_template_copies || 1;
+  }, [restaurant]);
+
   // close if there is not printer in product
   useEffect(() => {
     const check = order.products.some((product) => product.printer);
@@ -169,17 +173,21 @@ const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
 
   // print
   useEffect(() => {
-    if (!restaurant) return;
-
     if (!toPrint.length) return;
 
-    if (
-      printedQuantity === restaurant?.printer_setting.shipment_template_copies
-    )
+    const [printing] = toPrint;
+
+    if (printedQuantity === copies) {
+      setPrinters((oldPrinters) =>
+        oldPrinters.map((p) => {
+          if (p.id === printing.id) p.printed = true;
+          return p;
+        })
+      );
       return;
+    }
 
     const [win] = remote.BrowserWindow.getAllWindows();
-    const [printing] = toPrint;
 
     if (!win) return;
 
@@ -198,24 +206,8 @@ const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
           },
         },
         (success) => {
-          if (!success) return;
-
-          if (
-            printedQuantity + 1 <
-            restaurant.printer_setting.shipment_template_copies
-          ) {
+          if (success) {
             setPrintedQuantity((state) => state + 1);
-          } else if (
-            printedQuantity + 1 ===
-            restaurant.printer_setting.shipment_template_copies
-          ) {
-            setPrintedQuantity((state) => state + 1);
-            setPrinters((oldPrinters) =>
-              oldPrinters.map((p) => {
-                if (p.id === printing.id) p.printed = true;
-                return p;
-              })
-            );
           }
         }
       );
@@ -238,24 +230,8 @@ const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
             },
           },
           (success) => {
-            if (!success) return;
-
-            if (
-              printedQuantity + 1 <
-              restaurant.printer_setting.shipment_template_copies
-            ) {
+            if (success) {
               setPrintedQuantity((state) => state + 1);
-            } else if (
-              printedQuantity + 1 ===
-              restaurant.printer_setting.shipment_template_copies
-            ) {
-              setPrintedQuantity((state) => state + 1);
-              setPrinters((oldPrinters) =>
-                oldPrinters.map((p) => {
-                  if (p.id === printing.id) p.printed = true;
-                  return p;
-                })
-              );
             }
           }
         );
@@ -264,7 +240,7 @@ const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
         handleClose();
       }
     }
-  }, [toPrint, handleClose, printedQuantity, restaurant]);
+  }, [toPrint, handleClose, printedQuantity, copies]);
 
   return (
     <>

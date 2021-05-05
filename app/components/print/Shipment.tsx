@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState, Fragment, useMemo } from 'react';
 import { remote } from 'electron';
 import { makeStyles } from '@material-ui/styles';
 import { OrderData } from 'components/home/types';
@@ -103,6 +103,10 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
   const [toPrint, setToPrint] = useState<OrderData | null>(null);
   const [printedQuantity, setPrintedQuantity] = useState(0);
 
+  const copies = useMemo(() => {
+    return restaurant?.printer_setting.shipment_template_copies || 1;
+  }, [restaurant]);
+
   // get product printers
   useEffect(() => {
     if (order) {
@@ -114,8 +118,6 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
   }, [order]);
 
   useEffect(() => {
-    if (!restaurant) return;
-
     if (!toPrint) return;
 
     // fecha se o pedido já foi impresso
@@ -124,10 +126,13 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
       return;
     }
 
-    if (
-      printedQuantity === restaurant?.printer_setting.shipment_template_copies
-    )
+    if (printedQuantity === copies) {
+      setToPrint({
+        ...toPrint,
+        printed: true,
+      });
       return;
+    }
 
     const [win] = remote.BrowserWindow.getAllWindows();
 
@@ -147,28 +152,14 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
         (success) => {
           if (!success) return;
 
-          if (
-            printedQuantity + 1 <
-            restaurant.printer_setting.shipment_template_copies
-          ) {
-            setPrintedQuantity((state) => state + 1);
-          } else if (
-            printedQuantity + 1 ===
-            restaurant.printer_setting.shipment_template_copies
-          ) {
-            setPrintedQuantity((state) => state + 1);
-            setToPrint({
-              ...toPrint,
-              printed: true,
-            });
-          }
+          setPrintedQuantity((state) => state + 1);
         }
       );
     } catch (err) {
       console.log(err);
       handleClose();
     }
-  }, [toPrint, handleClose, restaurant, printedQuantity]);
+  }, [toPrint, handleClose, copies, printedQuantity]);
 
   return (
     <>

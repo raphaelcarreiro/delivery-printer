@@ -26,6 +26,7 @@ export default function user(
         ...action.user,
       };
     }
+
     default: {
       return state;
     }
