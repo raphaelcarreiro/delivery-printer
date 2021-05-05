@@ -78,6 +78,7 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
 
   const [printers, setPrinters] = useState<PrinterData[]>([]);
   const [toPrint, setToPrint] = useState<PrinterData[]>([]);
+  const [printedQuantity, setPrintedQuantity] = useState(0);
 
   // close if there is not printer in product
   useEffect(() => {
@@ -145,28 +146,85 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
   useEffect(() => {
     if (!restaurant) return;
 
-    if (toPrint.length > 0) {
-      const [win] = remote.BrowserWindow.getAllWindows();
-      const [printing] = toPrint;
+    if (!toPrint.length) return;
 
-      if (!win) return;
+    if (
+      printedQuantity === restaurant?.printer_setting.production_template_copies
+    )
+      return;
 
-      let error = false;
+    const [win] = remote.BrowserWindow.getAllWindows();
+    const [printing] = toPrint;
 
+    if (!win) return;
+
+    let error = false;
+
+    try {
+      win.webContents.print(
+        {
+          deviceName: printing.name,
+          color: false,
+          collate: false,
+          copies: 1,
+          silent: true,
+          margins: {
+            marginType: 'none',
+          },
+        },
+        (success) => {
+          if (!success) return;
+
+          if (
+            printedQuantity + 1 <
+            restaurant.printer_setting.production_template_copies
+          ) {
+            setPrintedQuantity((state) => state + 1);
+          } else if (
+            printedQuantity + 1 ===
+            restaurant.printer_setting.production_template_copies
+          ) {
+            setPrintedQuantity((state) => state + 1);
+            setPrinters((oldPrinters) =>
+              oldPrinters.map((p) => {
+                if (p.id === printing.id) p.printed = true;
+                return p;
+              })
+            );
+          }
+        }
+      );
+    } catch (err) {
+      console.log(err);
+      error = true;
+    }
+
+    // try to print in default printer
+    if (error) {
       try {
         win.webContents.print(
           {
-            deviceName: printing.name,
             color: false,
             collate: false,
-            copies: restaurant.printer_setting.production_template_copies,
+            copies: 1,
             silent: true,
             margins: {
               marginType: 'none',
             },
           },
           (success) => {
-            if (success) {
+            if (!success) return;
+
+            if (
+              printedQuantity + 1 <
+              restaurant.printer_setting.production_template_copies
+            ) {
+              setPrintedQuantity((state) => state + 1);
+            } else if (
+              printedQuantity + 1 ===
+              restaurant.printer_setting.production_template_copies
+            ) {
+              setPrintedQuantity((state) => state + 1);
               setPrinters((oldPrinters) =>
                 oldPrinters.map((p) => {
                   if (p.id === printing.id) p.printed = true;
@@ -178,40 +236,10 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
         );
       } catch (err) {
         console.log(err);
-        error = true;
-      }
-
-      // try to print in default printer
-      if (error) {
-        try {
-          win.webContents.print(
-            {
-              color: false,
-              collate: false,
-              copies: restaurant.printer_setting.production_template_copies,
-              silent: true,
-              margins: {
-                marginType: 'none',
-              },
-            },
-            (success) => {
-              if (success) {
-                setPrinters((oldPrinters) =>
-                  oldPrinters.map((p) => {
-                    if (p.id === printing.id) p.printed = true;
-                    return p;
-                  })
-                );
-              }
-            }
-          );
-        } catch (err) {
-          console.log(err);
-          handleClose();
-        }
+        handleClose();
       }
     }
-  }, [toPrint, handleClose, restaurant]);
+  }, [toPrint, handleClose, restaurant, printedQuantity]);
 
   return (
     <>

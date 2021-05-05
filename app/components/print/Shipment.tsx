@@ -101,6 +101,7 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
     fontSize: restaurant ? restaurant.printer_setting.font_size : 14,
   });
   const [toPrint, setToPrint] = useState<OrderData | null>(null);
+  const [printedQuantity, setPrintedQuantity] = useState(0);
 
   // get product printers
   useEffect(() => {
@@ -115,41 +116,59 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
   useEffect(() => {
     if (!restaurant) return;
 
-    if (toPrint) {
-      // fecha se o pedido já foi impresso
-      if (toPrint.printed) {
-        handleClose();
-        return;
-      }
-      const [win] = remote.BrowserWindow.getAllWindows();
+    if (!toPrint) return;
 
-      if (!win) return;
-
-      try {
-        win.webContents.print(
-          {
-            color: false,
-            collate: false,
-            copies: restaurant.printer_setting.shipment_template_copies,
-            silent: true,
-            margins: {
-              marginType: 'none',
-            },
-          },
-          (success) => {
-            if (success)
-              setToPrint({
-                ...toPrint,
-                printed: true,
-              });
-          }
-        );
-      } catch (err) {
-        console.log(err);
-        handleClose();
-      }
+    // fecha se o pedido já foi impresso
+    if (toPrint.printed) {
+      handleClose();
+      return;
     }
-  }, [toPrint, handleClose, restaurant]);
+
+    if (
+      printedQuantity === restaurant?.printer_setting.shipment_template_copies
+    )
+      return;
+
+    const [win] = remote.BrowserWindow.getAllWindows();
+
+    if (!win) return;
+
+    try {
+      win.webContents.print(
+        {
+          color: false,
+          collate: false,
+          copies: 1,
+          silent: true,
+          margins: {
+            marginType: 'none',
+          },
+        },
+        (success) => {
+          if (!success) return;
+
+          if (
+            printedQuantity + 1 <
+            restaurant.printer_setting.shipment_template_copies
+          ) {
+            setPrintedQuantity((state) => state + 1);
+          } else if (
+            printedQuantity + 1 ===
+            restaurant.printer_setting.shipment_template_copies
+          ) {
+            setPrintedQuantity((state) => state + 1);
+            setToPrint({
+              ...toPrint,
+              printed: true,
+            });
+          }
+        }
+      );
+    } catch (err) {
+      console.log(err);
+      handleClose();
+    }
+  }, [toPrint, handleClose, restaurant, printedQuantity]);
 
   return (
     <>

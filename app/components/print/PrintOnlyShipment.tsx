@@ -4,12 +4,20 @@ import { makeStyles } from '@material-ui/styles';
 import { OrderData, PrinterData } from 'components/home/types';
 import { api } from 'services/api';
 import PrintTypography from 'components/print-typography/PrintTypography';
+import { Theme } from '@material-ui/core';
+import { useSelector } from 'store';
 import Complements from './Complements';
 
-const useStyles = makeStyles({
-  container: {
+interface UseStylesProps {
+  fontSize: number;
+}
+
+const useStyles = makeStyles<Theme, UseStylesProps>({
+  container: (props) => ({
     maxWidth: '80mm',
-    padding: '15px 15px 30px 15px',
+    minHeight: 300,
+    padding: 15,
+    fontSize: props.fontSize,
     backgroundColor: '#faebd7',
     border: '2px dashed #ccc',
     '@media print': {
@@ -20,22 +28,27 @@ const useStyles = makeStyles({
         marginRight: 30,
       },
     },
+  }),
+  annotation: {
+    marginLeft: 10,
   },
   products: {
-    padding: '7px 0 0',
+    marginBottom: 15,
+    padding: '5px 0 0',
     borderTop: '1px dashed #333',
   },
-  complement: {
-    marginLeft: 6,
-  },
-  additional: {
-    marginRight: 6,
-  },
-  ingredient: {
-    marginRight: 6,
+  loading: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   headerProducts: {
     marginTop: 7,
+  },
+  productName: {
+    textTransform: 'uppercase',
+    fontSize: 16,
+    fontWeight: 600,
   },
   product: {
     width: '100%',
@@ -43,34 +56,37 @@ const useStyles = makeStyles({
   },
   productAmount: {
     minWidth: 25,
-    paddingBottom: 10,
     display: 'flex',
     paddingTop: 0,
+  },
+  customerData: {
+    display: 'grid',
+    gridTemplateColumns: '75px 1fr',
+    marginBottom: 2,
+    columnGap: 7,
+  },
+  title: {
+    fontWeight: 600,
+  },
+  date: {
+    marginBottom: 10,
   },
   complementCategory: {
     display: 'grid',
     gridTemplateColumns: '0.5fr 1fr',
-  },
-  additionalInfoContainer: {
-    display: 'flex',
-    flexWrap: 'wrap',
-  },
-  developer: {
-    marginTop: 15,
+    alignItems: 'center',
   },
   totals: {
     display: 'grid',
-    gridTemplateColumns: '115px 1fr',
+    gridTemplateColumns: '1.5fr 1fr',
     rowGap: '4px',
     '& div': {
       display: 'flex',
       alignItems: 'center',
     },
   },
-  customerData: {
-    display: 'grid',
-    gridTemplateColumns: '70px 1fr',
-    marginBottom: 2,
+  developer: {
+    marginTop: 15,
   },
 });
 
@@ -80,9 +96,14 @@ interface PrintProps {
 }
 
 const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
-  const classes = useStyles();
+  const restaurant = useSelector((state) => state.restaurant);
+
+  const classes = useStyles({
+    fontSize: restaurant ? restaurant.printer_setting.font_size : 14,
+  });
   const [printers, setPrinters] = useState<PrinterData[]>([]);
   const [toPrint, setToPrint] = useState<PrinterData[]>([]);
+  const [printedQuantity, setPrintedQuantity] = useState(0);
 
   // close if there is not printer in product
   useEffect(() => {
@@ -148,18 +169,66 @@ const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
 
   // print
   useEffect(() => {
-    if (toPrint.length > 0) {
-      const [win] = remote.BrowserWindow.getAllWindows();
-      const [printing] = toPrint;
+    if (!restaurant) return;
 
-      if (!win) return;
+    if (!toPrint.length) return;
 
-      let error = false;
+    if (
+      printedQuantity === restaurant?.printer_setting.shipment_template_copies
+    )
+      return;
 
+    const [win] = remote.BrowserWindow.getAllWindows();
+    const [printing] = toPrint;
+
+    if (!win) return;
+
+    let error = false;
+
+    try {
+      win.webContents.print(
+        {
+          deviceName: printing.name,
+          color: false,
+          collate: false,
+          copies: 1,
+          silent: true,
+          margins: {
+            marginType: 'none',
+          },
+        },
+        (success) => {
+          if (!success) return;
+
+          if (
+            printedQuantity + 1 <
+            restaurant.printer_setting.shipment_template_copies
+          ) {
+            setPrintedQuantity((state) => state + 1);
+          } else if (
+            printedQuantity + 1 ===
+            restaurant.printer_setting.shipment_template_copies
+          ) {
+            setPrintedQuantity((state) => state + 1);
+            setPrinters((oldPrinters) =>
+              oldPrinters.map((p) => {
+                if (p.id === printing.id) p.printed = true;
+                return p;
+              })
+            );
+          }
+        }
+      );
+    } catch (err) {
+      console.log(err);
+      error = true;
+    }
+
+    // try to print in default printer
+    if (error) {
       try {
         win.webContents.print(
           {
-            deviceName: printing.name,
             color: false,
             collate: false,
             copies: 1,
@@ -169,7 +238,18 @@ const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
             },
           },
           (success) => {
-            if (success) {
+            if (!success) return;
+
+            if (
+              printedQuantity + 1 <
+              restaurant.printer_setting.shipment_template_copies
+            ) {
+              setPrintedQuantity((state) => state + 1);
+            } else if (
+              printedQuantity + 1 ===
+              restaurant.printer_setting.shipment_template_copies
+            ) {
+              setPrintedQuantity((state) => state + 1);
               setPrinters((oldPrinters) =>
                 oldPrinters.map((p) => {
                   if (p.id === printing.id) p.printed = true;
@@ -181,47 +261,17 @@ const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
         );
       } catch (err) {
         console.log(err);
-        error = true;
-      }
-
-      // try to print in default printer
-      if (error) {
-        try {
-          win.webContents.print(
-            {
-              color: false,
-              collate: false,
-              copies: 1,
-              silent: true,
-              margins: {
-                marginType: 'none',
-              },
-            },
-            (success) => {
-              if (success) {
-                setPrinters((oldPrinters) =>
-                  oldPrinters.map((p) => {
-                    if (p.id === printing.id) p.printed = true;
-                    return p;
-                  })
-                );
-              }
-            }
-          );
-        } catch (err) {
-          console.log(err);
-          handleClose();
-        }
+        handleClose();
       }
     }
-  }, [toPrint, handleClose]);
+  }, [toPrint, handleClose, printedQuantity, restaurant]);
 
   return (
     <>
       {toPrint.length > 0 &&
         toPrint.map((printer) => (
           <div key={printer.id} className={classes.container}>
-            <PrintTypography fontSize={20} bold gutterBottom>
+            <PrintTypography fontSize={1.2} bold gutterBottom>
               PEDIDO {order.formattedId}
             </PrintTypography>
             <PrintTypography gutterBottom>
@@ -352,7 +402,7 @@ const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
                 <PrintTypography>Total a pagar</PrintTypography>
               </div>
               <div>
-                <PrintTypography fontSize={18} bold>
+                <PrintTypography fontSize={1.2} bold>
                   {order.formattedTotal}
                 </PrintTypography>
               </div>
@@ -372,7 +422,7 @@ const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
               )}
             </div>
             <div className={classes.developer}>
-              <PrintTypography fontSize={12} align="center">
+              <PrintTypography fontSize={0.9} align="center">
                 www.sgrande.delivery
               </PrintTypography>
             </div>
