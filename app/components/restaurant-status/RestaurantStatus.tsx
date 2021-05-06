@@ -37,7 +37,7 @@ interface RestaurantStatusProps {
 }
 
 const RestaurantStatus: React.FC<RestaurantStatusProps> = ({ wsConnected }) => {
-  const restaurant = useSelector((state) => state.restaurant);
+  const restaurant = useSelector(state => state.restaurant);
   const classes = useStyles({ restaurantIsOpen: restaurant?.is_open || false });
 
   return (

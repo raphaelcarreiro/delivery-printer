@@ -1,10 +1,5 @@
 import React, { ChangeEvent } from 'react';
-import {
-  TextField,
-  Typography,
-  IconButton,
-  InputAdornment,
-} from '@material-ui/core';
+import { TextField, Typography, IconButton, InputAdornment } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { MdArrowBack, MdVisibility, MdVisibilityOff } from 'react-icons/md';
 
@@ -47,11 +42,7 @@ const PasswordStep: React.FC<PasswordStepProps> = ({
 
   return (
     <>
-      <IconButton
-        color="primary"
-        className={classes.arrowBackIcon}
-        onClick={handleStepBack}
-      >
+      <IconButton color="primary" className={classes.arrowBackIcon} onClick={handleStepBack}>
         <MdArrowBack />
       </IconButton>
       <Typography align="center" color="primary">
@@ -73,11 +64,7 @@ const PasswordStep: React.FC<PasswordStepProps> = ({
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton onClick={handlePasswordVisibility}>
-                  {shownPassword ? (
-                    <MdVisibilityOff size={20} color="#666" />
-                  ) : (
-                    <MdVisibility size={20} color="#666" />
-                  )}
+                  {shownPassword ? <MdVisibilityOff size={20} color="#666" /> : <MdVisibility size={20} color="#666" />}
                 </IconButton>
               </InputAdornment>
             ),
@@ -85,12 +72,7 @@ const PasswordStep: React.FC<PasswordStepProps> = ({
           autoFocus
         />
       </div>
-      <input
-        type="hidden"
-        autoComplete="email username"
-        name="username"
-        value={login.email}
-      />
+      <input type="hidden" autoComplete="email username" name="username" value={login.email} />
     </>
   );
 };

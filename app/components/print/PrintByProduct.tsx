@@ -13,7 +13,7 @@ interface UseStylesProps {
 }
 
 const useStyles = makeStyles<Theme, UseStylesProps>({
-  container: (props) => ({
+  container: props => ({
     maxWidth: '80mm',
     padding: '15px 15px 30px 15px',
     backgroundColor: '#faebd7',
@@ -70,7 +70,7 @@ interface PrintProps {
 }
 
 const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
-  const restaurant = useSelector((state) => state.restaurant);
+  const restaurant = useSelector(state => state.restaurant);
 
   const classes = useStyles({
     fontSize: restaurant?.printer_setting.font_size || 14,
@@ -81,7 +81,7 @@ const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
 
   // close if there is not printer in product
   useEffect(() => {
-    const check = order.products.some((product) => product.printer);
+    const check = order.products.some(product => product.printer);
     if (!check) handleClose();
   }, [handleClose, order]);
 
@@ -90,7 +90,7 @@ const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
     if (!order) return;
 
     let productsToPrint: ProductPrinterData[] = [];
-    order.products.forEach((product) => {
+    order.products.forEach(product => {
       if (product.printer) {
         let i = 1;
         do {
@@ -107,13 +107,10 @@ const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
       }
     });
 
-    productsToPrint = productsToPrint.map((productToPrint) => {
+    productsToPrint = productsToPrint.map(productToPrint => {
       productToPrint.order = {
         ...order,
-        products: order.products.filter(
-          (product) =>
-            product.printer && product.id === productToPrint.productId
-        ),
+        products: order.products.filter(product => product.printer && product.id === productToPrint.productId),
       };
       productToPrint.printed = false;
       return productToPrint;
@@ -135,11 +132,11 @@ const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
     }
 
     if (products.length > 0) {
-      const tp = products.find((p) => !p.printed);
+      const tp = products.find(p => !p.printed);
 
       // close if all order products had been printed
       if (!tp) {
-        const check = products.every((p) => p.printed);
+        const check = products.every(p => p.printed);
         if (check) setPrinted();
         return;
       }
@@ -170,16 +167,16 @@ const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
               marginType: 'none',
             },
           },
-          (success) => {
+          success => {
             if (success) {
-              setProducts((oldValue) =>
-                oldValue.map((p) => {
+              setProducts(oldValue =>
+                oldValue.map(p => {
                   if (p.id === printing.id) p.printed = true;
                   return p;
-                })
+                }),
               );
             }
-          }
+          },
         );
       } catch (err) {
         console.log(err);
@@ -199,16 +196,16 @@ const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
                 marginType: 'none',
               },
             },
-            (success) => {
+            success => {
               if (success) {
-                setProducts((oldValue) =>
-                  oldValue.map((p) => {
+                setProducts(oldValue =>
+                  oldValue.map(p => {
                     if (p.id === printing.id) p.printed = true;
                     return p;
-                  })
+                  }),
                 );
               }
-            }
+            },
           );
         } catch (err) {
           console.log(err);
@@ -221,15 +218,13 @@ const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
   return (
     <>
       {toPrint.length > 0 &&
-        toPrint.map((printer) => (
+        toPrint.map(printer => (
           <div className={classes.container} key={printer.id}>
             <PrintTypography fontSize={1.2} bold gutterBottom>
               PEDIDO {order.formattedId}
             </PrintTypography>
             <PrintTypography>{order.formattedDate}</PrintTypography>
-            <PrintTypography gutterBottom>
-              {order.customer.name}
-            </PrintTypography>
+            <PrintTypography gutterBottom>{order.customer.name}</PrintTypography>
             {order.shipment.shipment_method === 'delivery' && (
               <PrintTypography>
                 {`${order.shipment.address}, ${order.shipment.number},
@@ -237,14 +232,11 @@ const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
                 ${order.shipment.region}`}
               </PrintTypography>
             )}
-            {order.shipment.shipment_method === 'customer_collect' &&
-            !order.shipment.scheduled_at ? (
+            {order.shipment.shipment_method === 'customer_collect' && !order.shipment.scheduled_at ? (
               <PrintTypography>**Cliente retira**</PrintTypography>
             ) : (
               order.shipment.scheduled_at && (
-                <PrintTypography>
-                  **Cliente retira ás {order.shipment.formattedScheduledAt}**
-                </PrintTypography>
+                <PrintTypography>**Cliente retira ás {order.shipment.formattedScheduledAt}**</PrintTypography>
               )
             )}
             <table className={classes.headerProducts}>
@@ -262,7 +254,7 @@ const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
             <div className={classes.products}>
               <table>
                 <tbody>
-                  {printer.order.products.map((product) => (
+                  {printer.order.products.map(product => (
                     <tr key={product.id}>
                       <td className={classes.productAmount}>
                         <PrintTypography>{product.amount}x</PrintTypography>
@@ -272,19 +264,13 @@ const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
                           {product.name}
                         </PrintTypography>
                         {product.annotation && (
-                          <PrintTypography fontSize={0.8}>
-                            Obs: {product.annotation}
-                          </PrintTypography>
+                          <PrintTypography fontSize={0.8}>Obs: {product.annotation}</PrintTypography>
                         )}
                         <div className={classes.additionalInfoContainer}>
                           {product.additional.length > 0 && (
                             <>
-                              {product.additional.map((additional) => (
-                                <PrintTypography
-                                  display="inline"
-                                  className={classes.additional}
-                                  key={additional.id}
-                                >
+                              {product.additional.map(additional => (
+                                <PrintTypography display="inline" className={classes.additional} key={additional.id}>
                                   {`c/ ${additional.amount}x ${additional.name}`}
                                 </PrintTypography>
                               ))}
@@ -292,12 +278,8 @@ const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
                           )}
                           {product.ingredients.length > 0 && (
                             <>
-                              {product.ingredients.map((ingredient) => (
-                                <PrintTypography
-                                  display="inline"
-                                  className={classes.ingredient}
-                                  key={ingredient.id}
-                                >
+                              {product.ingredients.map(ingredient => (
+                                <PrintTypography display="inline" className={classes.ingredient} key={ingredient.id}>
                                   {`s/ ${ingredient.name}`}
                                 </PrintTypography>
                               ))}
@@ -306,16 +288,12 @@ const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
                         </div>
                         {product.complement_categories.length > 0 && (
                           <>
-                            {product.complement_categories.map((category) => (
+                            {product.complement_categories.map(category => (
                               <Fragment key={category.id}>
                                 {category.complements.length > 0 && (
                                   <div className={classes.complementCategory}>
-                                    <PrintTypography italic>
-                                      {category.print_name || category.name}
-                                    </PrintTypography>
-                                    <Complements
-                                      complementCategory={category}
-                                    />
+                                    <PrintTypography italic>{category.print_name || category.name}</PrintTypography>
+                                    <Complements complementCategory={category} />
                                   </div>
                                 )}
                               </Fragment>

@@ -80,7 +80,7 @@ const PrintPos: React.FC<PrintProps> = ({ handleClose, order }) => {
 
   // close if there is not printer in product
   useEffect(() => {
-    const check = order.products.some((product) => product.printer);
+    const check = order.products.some(product => product.printer);
     if (!check) handleClose();
   }, [handleClose, order]);
 
@@ -88,21 +88,17 @@ const PrintPos: React.FC<PrintProps> = ({ handleClose, order }) => {
   useEffect(() => {
     if (order) {
       let productPrinters: PrinterData[] = [];
-      order.products.forEach((product) => {
+      order.products.forEach(product => {
         if (product.printer) {
-          if (
-            !productPrinters.some(
-              (printer) => printer.id === product.printer.id
-            )
-          )
+          if (!productPrinters.some(printer => printer.id === product.printer.id))
             productPrinters.push(product.printer);
         }
       });
 
-      productPrinters = productPrinters.map((_printer) => {
+      productPrinters = productPrinters.map(_printer => {
         _printer.order = {
           ...order,
-          products: order.products.filter((product) => {
+          products: order.products.filter(product => {
             return product.printer && product.printer.id === _printer.id;
           }),
         };
@@ -127,11 +123,11 @@ const PrintPos: React.FC<PrintProps> = ({ handleClose, order }) => {
     }
 
     if (printers.length > 0) {
-      const tp = printers.find((p) => !p.printed);
+      const tp = printers.find(p => !p.printed);
 
       // close if all order products had been printed
       if (!tp) {
-        const check = printers.every((p) => p.printed);
+        const check = printers.every(p => p.printed);
         if (check) setPrinted();
         return;
       }
@@ -185,14 +181,14 @@ const PrintPos: React.FC<PrintProps> = ({ handleClose, order }) => {
 
     PosPrinter.print(data, options)
       .then(() => {
-        setPrinters((oldPrinters) =>
-          oldPrinters.map((p) => {
+        setPrinters(oldPrinters =>
+          oldPrinters.map(p => {
             if (p.id === printing.id) p.printed = true;
             return p;
-          })
+          }),
         );
       })
-      .catch((error) => {
+      .catch(error => {
         console.error(error);
       });
   }, [toPrint, handleClose]);
@@ -200,7 +196,7 @@ const PrintPos: React.FC<PrintProps> = ({ handleClose, order }) => {
   return (
     <>
       {toPrint.length > 0 &&
-        toPrint.map((printer) => (
+        toPrint.map(printer => (
           <div className={classes.container} key={printer.id}>
             <Typography variant="h6" className={classes.title} gutterBottom>
               PEDIDO {order.formattedId}
@@ -209,18 +205,14 @@ const PrintPos: React.FC<PrintProps> = ({ handleClose, order }) => {
             <Typography gutterBottom>{order.customer.name}</Typography>
             {order.shipment.shipment_method === 'delivery' && (
               <Typography variant="body2">
-                {order.shipment.address}, {order.shipment.number},{' '}
-                {order.shipment.district}
+                {order.shipment.address}, {order.shipment.number}, {order.shipment.district}
               </Typography>
             )}
-            {order.shipment.shipment_method === 'customer_collect' &&
-            !order.shipment.scheduled_at ? (
+            {order.shipment.shipment_method === 'customer_collect' && !order.shipment.scheduled_at ? (
               <Typography>**Cliente retira**</Typography>
             ) : (
               order.shipment.scheduled_at && (
-                <Typography>
-                  **Cliente retira ás {order.shipment.formattedScheduledAt}**
-                </Typography>
+                <Typography>**Cliente retira ás {order.shipment.formattedScheduledAt}**</Typography>
               )
             )}
             <table className={classes.headerProducts}>
@@ -238,23 +230,17 @@ const PrintPos: React.FC<PrintProps> = ({ handleClose, order }) => {
             <div className={classes.products}>
               <table>
                 <tbody>
-                  {printer.order.products.map((product) => (
+                  {printer.order.products.map(product => (
                     <tr key={product.id}>
                       <td className={classes.productAmount}>
                         <Typography>{product.amount}x</Typography>
                       </td>
                       <td className={classes.product}>
-                        <Typography className={classes.productName}>
-                          {product.name}
-                        </Typography>
-                        {product.annotation && (
-                          <Typography variant="body2">
-                            Obs: {product.annotation}
-                          </Typography>
-                        )}
+                        <Typography className={classes.productName}>{product.name}</Typography>
+                        {product.annotation && <Typography variant="body2">Obs: {product.annotation}</Typography>}
                         {product.additional.length > 0 && (
                           <>
-                            {product.additional.map((additional) => (
+                            {product.additional.map(additional => (
                               <Typography
                                 display="inline"
                                 variant="body2"
@@ -268,7 +254,7 @@ const PrintPos: React.FC<PrintProps> = ({ handleClose, order }) => {
                         )}
                         {product.ingredients.length > 0 && (
                           <>
-                            {product.ingredients.map((ingredient) => (
+                            {product.ingredients.map(ingredient => (
                               <Typography
                                 display="inline"
                                 variant="body2"
@@ -282,16 +268,12 @@ const PrintPos: React.FC<PrintProps> = ({ handleClose, order }) => {
                         )}
                         {product.complement_categories.length > 0 && (
                           <>
-                            {product.complement_categories.map((category) => (
+                            {product.complement_categories.map(category => (
                               <Fragment key={category.id}>
                                 {category.complements.length > 0 && (
                                   <div className={classes.complementCategory}>
-                                    <Typography variant="body2">
-                                      {category.print_name || category.name}
-                                    </Typography>
-                                    <Complements
-                                      complementCategory={category}
-                                    />
+                                    <Typography variant="body2">{category.print_name || category.name}</Typography>
+                                    <Complements complementCategory={category} />
                                   </div>
                                 )}
                               </Fragment>

@@ -20,12 +20,7 @@ const PrintTypography: React.FC<PrintTypographyProps> = ({
   ...rest
 }) => {
   return (
-    <StyledPrintTypography
-      gutterBottom={gutterBottom}
-      upperCase={upperCase}
-      italic={italic}
-      {...rest}
-    >
+    <StyledPrintTypography gutterBottom={gutterBottom} upperCase={upperCase} italic={italic} {...rest}>
       {children}
     </StyledPrintTypography>
   );

@@ -25,7 +25,7 @@ export default function Home(): JSX.Element {
   const [toPrint, setToPrint] = useState<OrderData | null>(null);
   const [shipment, setShipment] = useState<OrderData | null>(null);
   const [wsConnected, setWsConnected] = useState(false);
-  const restaurant = useSelector((state) => state.restaurant);
+  const restaurant = useSelector(state => state.restaurant);
   const dispatch = useDispatch();
   const { loading } = useApp();
   const auth = useAuth();
@@ -51,7 +51,7 @@ export default function Home(): JSX.Element {
         locale: ptbr,
         roundingMethod: 'ceil',
       }),
-      products: order.products.map((product) => {
+      products: order.products.map(product => {
         product.formattedFinalPrice = moneyFormat(product.final_price);
         product.formattedPrice = moneyFormat(product.price);
         return product;
@@ -70,10 +70,8 @@ export default function Home(): JSX.Element {
       try {
         const response = await api().get('/orders/print/list');
         if (response.data.length > 0) {
-          const formattedOrders = response.data.map((order: OrderData) =>
-            formatOrder(order)
-          );
-          setOrders((oldOrders) => [...oldOrders, ...formattedOrders]);
+          const formattedOrders = response.data.map((order: OrderData) => formatOrder(order));
+          setOrders(oldOrders => [...oldOrders, ...formattedOrders]);
         }
       } catch (err) {
         console.log(err);
@@ -90,7 +88,7 @@ export default function Home(): JSX.Element {
 
   useEffect(() => {
     if (orders.length > 0) {
-      const tp = orders.find((order) => !order.printed);
+      const tp = orders.find(order => !order.printed);
 
       if (!tp) {
         setOrders([]);
@@ -120,12 +118,12 @@ export default function Home(): JSX.Element {
 
     socket.on('stored', (order: OrderData) => {
       const formattedOrder = formatOrder(order);
-      setOrders((oldOrders) => [...oldOrders, formattedOrder]);
+      setOrders(oldOrders => [...oldOrders, formattedOrder]);
     });
 
     socket.on('printOrder', (order: OrderData) => {
       const formattedOrder = formatOrder(order);
-      setOrders((oldOrders) => [...oldOrders, formattedOrder]);
+      setOrders(oldOrders => [...oldOrders, formattedOrder]);
     });
 
     if (!restaurant.configs.print_only_shipment)
@@ -146,11 +144,11 @@ export default function Home(): JSX.Element {
 
   const handleOrderClose = useCallback(() => {
     if (toPrint)
-      setOrders((oldOrders) =>
-        oldOrders.map((order) => {
+      setOrders(oldOrders =>
+        oldOrders.map(order => {
           if (order.id === toPrint.id) order.printed = true;
           return order;
-        })
+        }),
       );
   }, [toPrint]);
 

@@ -15,11 +15,7 @@ interface UserNameStepProps {
   loading: boolean;
 }
 
-const UsernameStep: React.FC<UserNameStepProps> = ({
-  email,
-  handleChange,
-  loading,
-}) => {
+const UsernameStep: React.FC<UserNameStepProps> = ({ email, handleChange, loading }) => {
   const classes = useStyles();
   return (
     <>

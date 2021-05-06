@@ -22,11 +22,7 @@ const InsideLoading: React.FC = () => {
     <>
       <div className={classes.container}>
         <CircularProgress color="primary" />
-        <Typography
-          variant="body2"
-          color="textSecondary"
-          className={classes.message}
-        >
+        <Typography variant="body2" color="textSecondary" className={classes.message}>
           Carregando
         </Typography>
       </div>

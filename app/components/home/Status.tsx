@@ -38,8 +38,8 @@ interface StatusProps {
 
 const Status: React.FC<StatusProps> = ({ wsConnected, handleLogout }) => {
   const classes = useStyles();
-  const restaurant = useSelector((state) => state.restaurant);
-  const user = useSelector((state) => state.user);
+  const restaurant = useSelector(state => state.restaurant);
+  const user = useSelector(state => state.user);
 
   return (
     <div className={classes.container}>
@@ -48,13 +48,7 @@ const Status: React.FC<StatusProps> = ({ wsConnected, handleLogout }) => {
         {user.name}
       </Typography>
       <RestaurantStatus wsConnected={wsConnected} />
-      <Button
-        className={classes.exitButton}
-        color="primary"
-        variant="text"
-        onClick={handleLogout}
-        size="small"
-      >
+      <Button className={classes.exitButton} color="primary" variant="text" onClick={handleLogout} size="small">
         Sair
       </Button>
       <div>

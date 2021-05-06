@@ -6,10 +6,7 @@ interface PublicRouteProps extends RouteProps {
   component: React.ComponentType;
 }
 
-const PublicRoute: React.FC<PublicRouteProps> = ({
-  component: Component,
-  ...rest
-}) => {
+const PublicRoute: React.FC<PublicRouteProps> = ({ component: Component, ...rest }) => {
   return (
     <Route
       {...rest}

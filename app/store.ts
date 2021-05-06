@@ -3,10 +3,7 @@ import { createHashHistory } from 'history';
 import { routerMiddleware } from 'connected-react-router';
 import { createLogger } from 'redux-logger';
 import { ThunkAction } from 'redux-thunk';
-import {
-  useSelector as useReduxSelector,
-  TypedUseSelectorHook,
-} from 'react-redux';
+import { useSelector as useReduxSelector, TypedUseSelectorHook } from 'react-redux';
 import createRootReducer from './rootReducer';
 
 export const history = createHashHistory();
@@ -18,9 +15,7 @@ const router = routerMiddleware(history);
 const middleware = [...getDefaultMiddleware(), router];
 
 const excludeLoggerEnvs = ['test', 'production'];
-const shouldIncludeLogger = !excludeLoggerEnvs.includes(
-  process.env.NODE_ENV || ''
-);
+const shouldIncludeLogger = !excludeLoggerEnvs.includes(process.env.NODE_ENV || '');
 
 if (shouldIncludeLogger) {
   const logger = createLogger({
@@ -42,7 +37,7 @@ export const configuredStore = (initialState?: RootState) => {
     module.hot.accept(
       './rootReducer',
       // eslint-disable-next-line global-require
-      () => store.replaceReducer(require('./rootReducer').default)
+      () => store.replaceReducer(require('./rootReducer').default),
     );
   }
   return store;

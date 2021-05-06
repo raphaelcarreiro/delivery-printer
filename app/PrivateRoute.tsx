@@ -7,10 +7,7 @@ interface PrivateRouteProps extends RouteProps {
   component: ComponentType;
 }
 
-const PrivateRoute: React.FC<PrivateRouteProps> = ({
-  component: Component,
-  ...rest
-}) => {
+const PrivateRoute: React.FC<PrivateRouteProps> = ({ component: Component, ...rest }) => {
   const auth = useAuth();
 
   return (

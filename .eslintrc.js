@@ -1,5 +1,15 @@
 module.exports = {
-  extends: ['erb/typescript', 'prettier', 'plugin:prettier/recommended'],
+  extends: [
+    'plugin:react/recommended',
+    'standard',
+    'prettier/@typescript-eslint',
+    'plugin:prettier/recommended',
+    'plugin:@typescript-eslint/recommended',
+  ],
+  env: {
+    browser: true,
+    es2021: true,
+  },
   rules: {
     // A temporary hack related to IDE not resolving correct package.json
     'prettier/prettier': 'error',
@@ -12,13 +22,13 @@ module.exports = {
     'promise/always-return': 'off',
     'no-console': 'off',
     'no-nested-ternary': 'off',
-    'react/jsx-filename-extension': [
-      1,
-      { extensions: ['.js', '.jsx', 'ts', 'tsx'] },
-    ],
+    'react/jsx-filename-extension': [1, { extensions: ['.js', '.jsx', 'ts', 'tsx'] }],
     'consistent-return': 'off',
     'react/jsx-wrap-multilines': 'off',
     'react/jsx-one-expression-per-line': 'off',
+    camelcase: 'off',
+    '@typescript-eslint/no-var-requires': 'off',
+    'node/no-path-concat': 'off',
   },
   parserOptions: {
     ecmaVersion: 2020,
@@ -27,7 +37,7 @@ module.exports = {
     tsconfigRootDir: __dirname,
     createDefaultProgram: true,
   },
-  plugins: ['prettier'],
+  plugins: ['react', '@typescript-eslint', 'prettier', 'react-hooks'],
   settings: {
     'import/resolver': {
       node: {},

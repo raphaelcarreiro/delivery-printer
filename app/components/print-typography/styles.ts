@@ -13,48 +13,48 @@ interface StyledPrintTypographyProps {
 
 export const StyledPrintTypography = styled.p<StyledPrintTypographyProps>`
   font-weight: 400;
-  font-size: ${(props) => (props.fontSize ? `${props.fontSize}em` : '1em')};
+  font-size: ${props => (props.fontSize ? `${props.fontSize}em` : '1em')};
   line-height: 1.2em;
   color: #000;
   font-family: sans-serif;
 
-  ${(props) =>
+  ${props =>
     props.bold &&
     css`
       font-weight: 600;
     `}
 
-  ${(props) =>
+  ${props =>
     props.align &&
     css`
       text-align: ${props.align};
     `}
 
-  ${(props) =>
+  ${props =>
     props.display &&
     css`
       display: ${props.display};
     `}
 
-  ${(props) =>
+  ${props =>
     props.gutterBottom &&
     css`
       margin-bottom: 8px;
     `}
 
-  ${(props) =>
+  ${props =>
     props.upperCase &&
     css`
       text-transform: uppercase;
     `}
 
-  ${(props) =>
+  ${props =>
     props.italic &&
     css`
       font-style: italic;
     `}
 
-    ${(props) =>
+    ${props =>
       props.noWrap &&
       css`
         white-space: nowrap;

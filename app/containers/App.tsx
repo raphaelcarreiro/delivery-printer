@@ -14,9 +14,7 @@ interface AppContextData {
   loading: boolean;
 }
 
-export const AppContext = React.createContext<AppContextData>(
-  {} as AppContextData
-);
+export const AppContext = React.createContext<AppContextData>({} as AppContextData);
 
 export function useApp(): AppContextData {
   const context = useContext(AppContext);
@@ -29,7 +27,7 @@ export default function App(props: Props) {
   const dispatch = useDispatch();
   const auth = useAuth();
   const [loading, setLoading] = useState(false);
-  const user = useSelector((state) => state.user);
+  const user = useSelector(state => state.user);
 
   useEffect(() => {
     const authenticated = auth.isAuthenticated();
@@ -38,7 +36,7 @@ export default function App(props: Props) {
         setLoading(true);
         api()
           .get('/users/current')
-          .then((response) => {
+          .then(response => {
             dispatch(setRestaurant(response.data.restaurant));
             dispatch(setUser(response.data));
           })
@@ -49,7 +47,5 @@ export default function App(props: Props) {
     }
   }, [user, auth, dispatch]);
 
-  return (
-    <AppContext.Provider value={{ loading }}>{children}</AppContext.Provider>
-  );
+  return <AppContext.Provider value={{ loading }}>{children}</AppContext.Provider>;
 }

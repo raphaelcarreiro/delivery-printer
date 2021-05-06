@@ -13,9 +13,7 @@ interface OrderProductComplementProps {
   complementCategory: ComplementCategory;
 }
 
-const OrderProductComplements: React.FC<OrderProductComplementProps> = ({
-  complementCategory,
-}) => {
+const OrderProductComplements: React.FC<OrderProductComplementProps> = ({ complementCategory }) => {
   const classes = useStyles();
 
   return (
@@ -24,8 +22,7 @@ const OrderProductComplements: React.FC<OrderProductComplementProps> = ({
         <div
           key={complement.id}
           style={
-            complement.additional.length > 0 ||
-            complement.ingredients.length > 0
+            complement.additional.length > 0 || complement.ingredients.length > 0
               ? { display: 'block' }
               : { display: 'inline-flex' }
           }
@@ -35,21 +32,13 @@ const OrderProductComplements: React.FC<OrderProductComplementProps> = ({
             {index !== complementCategory.complements.length - 1 && ', '}
           </PrintTypography>
           <div>
-            {complement.additional.map((additional) => (
-              <PrintTypography
-                display="inline"
-                className={classes.ingredient}
-                key={additional.id}
-              >
+            {complement.additional.map(additional => (
+              <PrintTypography display="inline" className={classes.ingredient} key={additional.id}>
                 {`c/ ${additional.name}`}
               </PrintTypography>
             ))}
-            {complement.ingredients.map((ingredient) => (
-              <PrintTypography
-                display="inline"
-                className={classes.ingredient}
-                key={ingredient.id}
-              >
+            {complement.ingredients.map(ingredient => (
+              <PrintTypography display="inline" className={classes.ingredient} key={ingredient.id}>
                 {`s/ ${ingredient.name}`}
               </PrintTypography>
             ))}

@@ -8,7 +8,7 @@ import { history } from 'store';
 import { useMessaging } from 'hooks/messaging';
 import InsideSaving from 'components/loading/InsideSaving';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   container: {
     display: 'flex',
     alignItems: 'center',
@@ -68,12 +68,12 @@ const Login: React.FC = () => {
 
       auth
         .checkEmail(email)
-        .then((response) => {
+        .then(response => {
           setName(response.name);
           setStep('password');
           messaging.handleClose();
         })
-        .catch((err) => {
+        .catch(err => {
           messaging.handleOpen(err.message);
         })
         .finally(() => {
@@ -88,7 +88,7 @@ const Login: React.FC = () => {
           setLoading(false);
           history.push('/');
         })
-        .catch((err) => {
+        .catch(err => {
           messaging.handleOpen(err.message);
           setLoading(false);
         });
@@ -113,22 +113,14 @@ const Login: React.FC = () => {
       <div className={classes.paper}>
         {loading && <InsideSaving />}
         <div>
-          <img
-            src="https://admin.sgrande.delivery/logo192.png"
-            className={classes.logo}
-            alt="Logo sgrande.delivery"
-          />
+          <img src="https://admin.sgrande.delivery/logo192.png" className={classes.logo} alt="Logo sgrande.delivery" />
         </div>
         <div className={classes.title}>
           <Typography variant="h6">Login</Typography>
         </div>
         <form onSubmit={handleSubmit} autoComplete="on">
           {step === 'email' ? (
-            <UsernameStep
-              handleChange={handleChange}
-              email={email}
-              loading={loading}
-            />
+            <UsernameStep handleChange={handleChange} email={email} loading={loading} />
           ) : (
             <PasswordStep
               handleChange={handleChange}
@@ -139,13 +131,7 @@ const Login: React.FC = () => {
               loading={loading}
             />
           )}
-          <Button
-            disabled={loading}
-            type="submit"
-            variant="contained"
-            color="primary"
-            fullWidth
-          >
+          <Button disabled={loading} type="submit" variant="contained" color="primary" fullWidth>
             {step === 'email' ? 'Próximo' : 'Entrar'}
           </Button>
         </form>

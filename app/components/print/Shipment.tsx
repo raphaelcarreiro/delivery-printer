@@ -12,7 +12,7 @@ interface UseStylesProps {
 }
 
 const useStyles = makeStyles<Theme, UseStylesProps>({
-  container: (props) => ({
+  container: props => ({
     maxWidth: '80mm',
     minHeight: 300,
     padding: 15,
@@ -95,7 +95,7 @@ interface PrintProps {
 }
 
 const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
-  const restaurant = useSelector((state) => state.restaurant);
+  const restaurant = useSelector(state => state.restaurant);
 
   const classes = useStyles({
     fontSize: restaurant ? restaurant.printer_setting.font_size : 14,
@@ -149,11 +149,11 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
             marginType: 'none',
           },
         },
-        (success) => {
+        success => {
           if (!success) return;
 
-          setPrintedQuantity((state) => state + 1);
-        }
+          setPrintedQuantity(state => state + 1);
+        },
       );
     } catch (err) {
       console.log(err);
@@ -169,14 +169,11 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
             PEDIDO {order.formattedId}
           </PrintTypography>
           <PrintTypography gutterBottom>{order.formattedDate}</PrintTypography>
-          {order.shipment.shipment_method === 'customer_collect' &&
-          !order.shipment.scheduled_at ? (
+          {order.shipment.shipment_method === 'customer_collect' && !order.shipment.scheduled_at ? (
             <PrintTypography gutterBottom>Cliente retira</PrintTypography>
           ) : (
             order.shipment.scheduled_at && (
-              <PrintTypography gutterBottom>
-                Retirada ás {order.shipment.formattedScheduledAt}
-              </PrintTypography>
+              <PrintTypography gutterBottom>Retirada ás {order.shipment.formattedScheduledAt}</PrintTypography>
             )
           )}
           <div className={classes.customerData}>
@@ -191,9 +188,7 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
             <div className={classes.customerData}>
               <PrintTypography noWrap>Endereço</PrintTypography>
               <div>
-                <PrintTypography>
-                  {`${order.shipment.address}, nº ${order.shipment.number}`}
-                </PrintTypography>
+                <PrintTypography>{`${order.shipment.address}, nº ${order.shipment.number}`}</PrintTypography>
                 <PrintTypography>{order.shipment.district}</PrintTypography>
                 <PrintTypography>{order.shipment.complement}</PrintTypography>
               </div>
@@ -214,7 +209,7 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
           <div className={classes.products}>
             <table>
               <tbody>
-                {order.products.map((product) => (
+                {order.products.map(product => (
                   <tr key={product.id}>
                     <td className={classes.productAmount}>
                       <PrintTypography>{product.amount}x</PrintTypography>
@@ -225,13 +220,11 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
                       </PrintTypography>
                       {product.complement_categories.length > 0 && (
                         <>
-                          {product.complement_categories.map((category) => (
+                          {product.complement_categories.map(category => (
                             <Fragment key={category.id}>
                               {category.complements.length > 0 && (
                                 <div className={classes.complementCategory}>
-                                  <PrintTypography italic>
-                                    {category.print_name || category.name}
-                                  </PrintTypography>
+                                  <PrintTypography italic>{category.print_name || category.name}</PrintTypography>
                                   <Complements complementCategory={category} />
                                 </div>
                               )}
@@ -298,7 +291,7 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
             </div>
             {order.deliverers.length > 0 && (
               <>
-                {order.deliverers.map((deliverer) => (
+                {order.deliverers.map(deliverer => (
                   <Fragment key={deliverer.id}>
                     <div>
                       <PrintTypography>Entregador</PrintTypography>

@@ -5,7 +5,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import { useMessaging, Options, CallbackFunction } from 'hooks/messaging';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   success: {
     backgroundColor: '#28a745',
   },
@@ -47,13 +47,7 @@ interface Messaging {
   open: boolean;
 }
 
-const Messaging: React.FC<Messaging> = ({
-  message,
-  options,
-  action,
-  handleAction,
-  open,
-}) => {
+const Messaging: React.FC<Messaging> = ({ message, options, action, handleAction, open }) => {
   const classes = useStyles();
   const messaging = useMessaging();
 
@@ -79,19 +73,11 @@ const Messaging: React.FC<Messaging> = ({
         }
         action={
           action ? (
-            <Button
-              classes={{ root: classes.actionText }}
-              size="small"
-              onClick={handleAction}
-            >
+            <Button classes={{ root: classes.actionText }} size="small" onClick={handleAction}>
               Desfazer
             </Button>
           ) : (
-            <Button
-              size="small"
-              classes={{ root: classes.actionText }}
-              onClick={messaging.handleClose}
-            >
+            <Button size="small" classes={{ root: classes.actionText }} onClick={messaging.handleClose}>
               Fechar
             </Button>
           )
