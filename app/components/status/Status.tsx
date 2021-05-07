@@ -1,6 +1,6 @@
 import React from 'react';
 import { makeStyles, Typography, Button } from '@material-ui/core';
-import { useSelector } from 'store';
+import { useSelector } from 'store/__selector';
 import RestaurantStatus from 'components/restaurant-status/RestaurantStatus';
 import packageJson from '../../package.json';
 

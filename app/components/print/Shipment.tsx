@@ -1,9 +1,9 @@
 import React, { useEffect, useState, Fragment, useMemo } from 'react';
 import { remote } from 'electron';
 import { makeStyles } from '@material-ui/styles';
-import { OrderData } from 'components/home/types';
+import { OrderData } from 'types/order';
 import PrintTypography from 'components/print-typography/PrintTypography';
-import { useSelector } from 'store';
+import { useSelector } from 'store/__selector';
 import { Theme } from '@material-ui/core';
 import Complements from './Complements';
 

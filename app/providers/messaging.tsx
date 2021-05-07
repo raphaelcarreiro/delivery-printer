@@ -3,11 +3,7 @@ import Messaging from 'components/messaging/Messaging';
 
 interface MessagingContextData {
   handleClose(): void;
-  handleOpen(
-    message: string,
-    action?: CallbackFunction,
-    options?: Options | null
-  ): void;
+  handleOpen(message: string, action?: CallbackFunction, options?: Options | null): void;
 }
 
 export interface Options {
@@ -29,11 +25,7 @@ const MessagingProvider: React.FC = ({ children }) => {
   }, []);
 
   const handleOpen = useCallback(
-    (
-      _message: string,
-      actionParam: null | CallbackFunction = null,
-      optionParam: Options | null = null
-    ) => {
+    (_message: string, actionParam: null | CallbackFunction = null, optionParam: Options | null = null) => {
       setOptions(optionParam);
 
       if (open) {
@@ -49,7 +41,7 @@ const MessagingProvider: React.FC = ({ children }) => {
         setOpen(true);
       }
     },
-    [open]
+    [open],
   );
 
   function handleAction() {
@@ -67,13 +59,7 @@ const MessagingProvider: React.FC = ({ children }) => {
       }}
     >
       {children}
-      <Messaging
-        message={message}
-        options={options}
-        action={action}
-        handleAction={handleAction}
-        open={open}
-      />
+      <Messaging message={message} options={options} action={action} handleAction={handleAction} open={open} />
     </MessagingContext.Provider>
   );
 };
@@ -81,8 +67,7 @@ const MessagingProvider: React.FC = ({ children }) => {
 export function useMessaging(): MessagingContextData {
   const context = useContext(MessagingContext);
 
-  if (!context)
-    throw new Error('This hook must be in Messaging Context Component');
+  if (!context) throw new Error('This hook must be in Messaging Context Component');
 
   return context;
 }

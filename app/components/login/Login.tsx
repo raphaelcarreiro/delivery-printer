@@ -3,10 +3,10 @@ import { Typography, Button } from '@material-ui/core';
 import UsernameStep from 'components/login/UsernameStep';
 import PasswordStep from 'components/login/PasswordStep';
 import { makeStyles } from '@material-ui/core/styles';
-import { useAuth } from 'hooks/auth';
-import { history } from 'store';
-import { useMessaging } from 'hooks/messaging';
+import { useAuth } from 'providers/auth';
+import { useMessaging } from 'providers/messaging';
 import InsideSaving from 'components/loading/InsideSaving';
+import { history } from 'services/history';
 
 const useStyles = makeStyles(theme => ({
   container: {
@@ -15,9 +15,6 @@ const useStyles = makeStyles(theme => ({
     justifyContent: 'center',
     flex: 1,
     backgroundColor: theme.palette.primary.light,
-    [theme.breakpoints.down('sm')]: {
-      // backgroundColor: '#fff',
-    },
   },
   paper: {
     padding: '30px',
@@ -53,11 +50,11 @@ const Login: React.FC = () => {
   const [step, setStep] = useState('email');
   const [loading, setLoading] = useState(false);
   const [shownPassword, setShownPassword] = useState(false);
-  const messaging = useMessaging();
   const auth = useAuth();
+  const messaging = useMessaging();
 
   useEffect(() => {
-    if (auth.isAuthenticated()) history.push('/');
+    if (auth.checkAuth()) history.push('/');
   }, [auth]);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {

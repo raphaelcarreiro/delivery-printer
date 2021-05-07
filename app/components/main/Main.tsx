@@ -1,12 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { parseISO, formatDistanceStrict, format } from 'date-fns';
 import ptbr from 'date-fns/locale/pt-BR';
-import { useSelector, history } from 'store';
-import { useApp } from 'containers/App';
+import { useSelector } from 'store/__selector';
 import InsideLoading from 'components/loading/InsideLoading';
 import io from 'socket.io-client';
-import { useAuth } from 'hooks/auth';
-import constants from 'constants/url';
+import { useAuth } from 'providers/auth';
+import constants from 'constants/constants';
 import { useDispatch } from 'react-redux';
 import { setRestaurantIsOpen } from 'store/modules/restaurant/actions';
 import { api } from 'services/api';
@@ -15,8 +14,9 @@ import PrintByProduct from 'components/print/PrintByProduct';
 import Print from 'components/print/Print';
 import PrintOnlyShipment from 'components/print/PrintOnlyShipment';
 import { moneyFormat } from '../../helpers/NumberFormat';
-import { OrderData } from './types';
-import Status from './Status';
+import Status from '../status/Status';
+import { history } from 'services/history';
+import { OrderData } from 'types/order';
 
 const socket: SocketIOClient.Socket = io.connect(constants.WS_BASE_URL);
 
@@ -27,7 +27,6 @@ export default function Home(): JSX.Element {
   const [wsConnected, setWsConnected] = useState(false);
   const restaurant = useSelector(state => state.restaurant);
   const dispatch = useDispatch();
-  const { loading } = useApp();
   const auth = useAuth();
 
   function formatId(id: number) {
@@ -68,7 +67,7 @@ export default function Home(): JSX.Element {
   useEffect(() => {
     async function getOrders() {
       try {
-        const response = await api().get('/orders/print/list');
+        const response = await api.get('/orders/print/list');
         if (response.data.length > 0) {
           const formattedOrders = response.data.map((order: OrderData) => formatOrder(order));
           setOrders(oldOrders => [...oldOrders, ...formattedOrders]);
@@ -163,7 +162,7 @@ export default function Home(): JSX.Element {
     });
   }
 
-  if (loading) return <InsideLoading />;
+  if (auth.loading) return <InsideLoading />;
 
   return (
     <>

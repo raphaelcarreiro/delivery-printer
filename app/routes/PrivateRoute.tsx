@@ -1,7 +1,7 @@
 import React, { ComponentType } from 'react';
 import { Route, Redirect, RouteProps } from 'react-router-dom';
-import { useAuth } from 'hooks/auth';
-import Default from 'components/layout/Default';
+import { useAuth } from 'providers/auth';
+import Default from 'components/layout/DefaultLayout';
 
 interface PrivateRouteProps extends RouteProps {
   component: ComponentType;
@@ -14,14 +14,14 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ component: Component, ...re
     <Route
       {...rest}
       render={() =>
-        auth.isAuthenticated() ? (
+        auth.checkAuth() ? (
           <Default>
-            <Component />{' '}
+            <Component />
           </Default>
         ) : (
           <Redirect to="/login" />
         )
-      } // eslint-disable-line
+      }
     />
   );
 };

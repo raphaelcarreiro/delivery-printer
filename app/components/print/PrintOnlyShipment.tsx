@@ -1,11 +1,11 @@
 import React, { useEffect, useState, Fragment, useMemo } from 'react';
 import { remote } from 'electron';
 import { makeStyles } from '@material-ui/styles';
-import { OrderData, PrinterData } from 'components/home/types';
+import { OrderData, PrinterData } from 'types/order';
 import { api } from 'services/api';
 import PrintTypography from 'components/print-typography/PrintTypography';
 import { Theme } from '@material-ui/core';
-import { useSelector } from 'store';
+import { useSelector } from 'store/__selector';
 import Complements from './Complements';
 
 interface UseStylesProps {
@@ -156,7 +156,7 @@ const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
   useEffect(() => {
     async function setPrinted() {
       try {
-        await api().post(`/orders/printed`, { order_id: order.id });
+        await api.post(`/orders/printed`, { order_id: order.id });
         console.log(`Alterado situação do pedido ${order.id}`);
         handleClose();
       } catch (err) {

@@ -3,7 +3,7 @@ import SnackbarContent from '@material-ui/core/SnackbarContent';
 import Snackbar from '@material-ui/core/Snackbar';
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
-import { useMessaging, Options, CallbackFunction } from 'hooks/messaging';
+import { useMessaging, Options, CallbackFunction } from 'providers/messaging';
 
 const useStyles = makeStyles(theme => ({
   success: {

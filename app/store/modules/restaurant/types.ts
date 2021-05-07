@@ -1,4 +1,4 @@
-import { Restaurant } from './reducer';
+import { Restaurant } from 'types/restaurant';
 
 export const SET_RESTAURANT = '@restaurant/SET_RESTAURANT';
 export const SET_IS_OPEN = '@restaurant/SET_IS_OPEN';
@@ -13,4 +13,4 @@ export interface SetRestaurantIsOpen {
   isOpen: boolean;
 }
 
-export type RestaurantActionTypes = SetRestaurantAction | SetRestaurantIsOpen;
+export type RestaurantActions = SetRestaurantAction | SetRestaurantIsOpen;

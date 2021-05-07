@@ -3,8 +3,8 @@
     "target": "ES2018",
     "module": "CommonJS",
     "lib": ["dom", "esnext"],
-    "declaration": true,
-    "declarationMap": true,
+    // "declaration": true,
+    // "declarationMap": true,
     "noEmit": true,
     "jsx": "react",
     "strict": true,
@@ -25,12 +25,5 @@
     "noImplicitAny": false
   },
   "include": ["app"],
-  "exclude": [
-    "test",
-    "release",
-    "app/main.prod.js",
-    "app/renderer.prod.js",
-    "app/dist",
-    "dll"
-  ]
+  "exclude": ["test", "release", "app/main.prod.js", "app/renderer.prod.js", "app/dist", "dll"]
 }

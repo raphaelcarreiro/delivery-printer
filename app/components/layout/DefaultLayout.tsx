@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles(theme => ({
@@ -31,13 +31,8 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-type Props = {
-  children: ReactNode;
-};
-
-export default function LayoutNoSidebar(props: Props) {
+const DefaultLayout: React.FC = ({ children }) => {
   const classes = useStyles();
-  const { children } = props;
 
   return (
     <div className={classes.wrapperContainer}>
@@ -48,4 +43,6 @@ export default function LayoutNoSidebar(props: Props) {
       </div>
     </div>
   );
-}
+};
+
+export default DefaultLayout;

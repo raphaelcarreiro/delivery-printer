@@ -1,8 +1,7 @@
-import { UserState } from './reducer';
+import { User } from 'types/user';
+import { SET_USER, UserActions } from './types';
 
-import { SET_USER, UserActionTypes } from './types';
-
-export function setUser(user: UserState): UserActionTypes {
+export function setUser(user: User): UserActions {
   return {
     type: SET_USER,
 

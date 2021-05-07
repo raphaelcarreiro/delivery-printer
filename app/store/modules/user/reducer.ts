@@ -1,25 +1,9 @@
-import { Image } from '../../index';
-import { UserActionTypes, SET_USER } from './types';
+import { User } from 'types/user';
+import { UserActions, SET_USER } from './types';
 
-export type rules = 'admin-admin' | 'admin-operator'; // eslint-disable-line
+const INITIAL_STATE: User = {} as User;
 
-export interface UserState {
-  id?: number;
-  image_id?: number;
-  name: string;
-  phone: string;
-  email: string;
-  image: Image;
-  activated: boolean;
-  rule: rules;
-}
-
-const INITIAL_STATE: UserState = {} as UserState;
-
-export default function user(
-  state = INITIAL_STATE,
-  action: UserActionTypes
-): UserState {
+export default function user(state = INITIAL_STATE, action: UserActions): User {
   switch (action.type) {
     case SET_USER: {
       return {

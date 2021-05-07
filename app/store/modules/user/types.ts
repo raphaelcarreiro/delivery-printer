@@ -1,10 +1,10 @@
-import { UserState } from './reducer';
+import { User } from 'types/user';
 
 export const SET_USER = '@user/SET_USER';
 
 interface SetUserAction {
   type: typeof SET_USER;
-  user: UserState;
+  user: User;
 }
 
-export type UserActionTypes = SetUserAction;
+export type UserActions = SetUserAction;

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, Fragment } from 'react';
 import { makeStyles } from '@material-ui/styles';
-import { OrderData, PrinterData } from 'components/home/types';
+import { OrderData, PrinterData } from 'types/order';
 import { Typography } from '@material-ui/core';
 import { api } from 'services/api';
 import { PosPrintOptions, PosPrintData } from 'electron-pos-printer';
@@ -113,7 +113,7 @@ const PrintPos: React.FC<PrintProps> = ({ handleClose, order }) => {
   useEffect(() => {
     async function setPrinted() {
       try {
-        await api().post(`/orders/printed`, { order_id: order.id });
+        await api.post(`/orders/printed`, { order_id: order.id });
         console.log(`Alterado situação do pedido ${order.id}`);
         handleClose();
       } catch (err) {

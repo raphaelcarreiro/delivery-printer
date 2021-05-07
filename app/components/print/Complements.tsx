@@ -1,7 +1,7 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/styles';
 import PrintTypography from 'components/print-typography/PrintTypography';
-import { ComplementCategory } from '../home/types';
+import { ComplementCategory } from 'types/order';
 
 const useStyles = makeStyles({
   ingredient: {
