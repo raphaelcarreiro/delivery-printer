@@ -3,7 +3,7 @@ import { remote } from 'electron';
 import { makeStyles } from '@material-ui/styles';
 import { OrderData } from 'types/order';
 import PrintTypography from 'components/print-typography/PrintTypography';
-import { useSelector } from 'store/__selector';
+import { useSelector } from 'store/selector';
 import { Theme } from '@material-ui/core';
 import Complements from './Complements';
 

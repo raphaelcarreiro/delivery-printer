@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { parseISO, formatDistanceStrict, format } from 'date-fns';
 import ptbr from 'date-fns/locale/pt-BR';
-import { useSelector } from 'store/__selector';
+import { useSelector } from 'store/selector';
 import InsideLoading from 'components/loading/InsideLoading';
 import io from 'socket.io-client';
 import { useAuth } from 'providers/auth';

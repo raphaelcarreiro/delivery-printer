@@ -5,7 +5,7 @@ import { OrderData, ProductPrinterData } from 'types/order';
 import { api } from 'services/api';
 import PrintTypography from 'components/print-typography/PrintTypography';
 import { Theme } from '@material-ui/core';
-import { useSelector } from 'store/__selector';
+import { useSelector } from 'store/selector';
 import Complements from './Complements';
 
 interface UseStylesProps {

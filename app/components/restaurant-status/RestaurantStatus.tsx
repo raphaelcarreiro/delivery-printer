@@ -2,7 +2,7 @@ import React from 'react';
 import { Typography } from '@material-ui/core';
 import { MdFiberManualRecord } from 'react-icons/md';
 import { makeStyles } from '@material-ui/core/styles';
-import { useSelector } from 'store/__selector';
+import { useSelector } from 'store/selector';
 
 const useStyles = makeStyles({
   status: ({ restaurantIsOpen }: { restaurantIsOpen: boolean }) => ({

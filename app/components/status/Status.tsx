@@ -1,6 +1,6 @@
 import React from 'react';
 import { makeStyles, Typography, Button } from '@material-ui/core';
-import { useSelector } from 'store/__selector';
+import { useSelector } from 'store/selector';
 import RestaurantStatus from 'components/restaurant-status/RestaurantStatus';
 import packageJson from '../../package.json';
 
@@ -52,7 +52,7 @@ const Status: React.FC<StatusProps> = ({ wsConnected, handleLogout }) => {
         Sair
       </Button>
       <div>
-        <Typography>Versão {packageJson.version}</Typography>
+        <Typography>versão {packageJson.version}</Typography>
       </div>
     </div>
   );

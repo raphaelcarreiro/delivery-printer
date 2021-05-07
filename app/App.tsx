@@ -6,7 +6,7 @@ import MessagingProvider from 'providers/messaging';
 import { MuiThemeProvider } from '@material-ui/core/styles';
 import { theme } from 'theme/theme';
 import Routes from './routes/Routes';
-import { store } from 'store/__index';
+import { store } from 'store/index';
 
 const Root = () => (
   <Provider store={store}>
