@@ -33,12 +33,12 @@ const OrderProductComplements: React.FC<OrderProductComplementProps> = ({ comple
           </PrintTypography>
           <div>
             {complement.additional.map(additional => (
-              <PrintTypography display="inline" className={classes.ingredient} key={additional.id}>
+              <PrintTypography bold fontSize={0.8} display="inline" className={classes.ingredient} key={additional.id}>
                 {`c/ ${additional.name}`}
               </PrintTypography>
             ))}
             {complement.ingredients.map(ingredient => (
-              <PrintTypography display="inline" className={classes.ingredient} key={ingredient.id}>
+              <PrintTypography bold fontSize={0.8} display="inline" className={classes.ingredient} key={ingredient.id}>
                 {`s/ ${ingredient.name}`}
               </PrintTypography>
             ))}

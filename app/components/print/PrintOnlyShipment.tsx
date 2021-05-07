@@ -74,7 +74,6 @@ const useStyles = makeStyles<Theme, UseStylesProps>({
   complementCategory: {
     display: 'grid',
     gridTemplateColumns: '0.5fr 1fr',
-    alignItems: 'center',
   },
   totals: {
     display: 'grid',
@@ -87,6 +86,19 @@ const useStyles = makeStyles<Theme, UseStylesProps>({
   },
   developer: {
     marginTop: 15,
+  },
+  complement: {
+    marginLeft: 6,
+  },
+  additional: {
+    marginRight: 6,
+  },
+  ingredient: {
+    marginRight: 6,
+  },
+  additionalInfoContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
   },
 });
 
@@ -296,6 +308,29 @@ const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
                         <PrintTypography upperCase bold>
                           {product.name} - {product.formattedFinalPrice}
                         </PrintTypography>
+                        {product.annotation && (
+                          <PrintTypography fontSize={0.8}>Obs: {product.annotation}</PrintTypography>
+                        )}
+                        <div className={classes.additionalInfoContainer}>
+                          {product.additional.length > 0 && (
+                            <>
+                              {product.additional.map(additional => (
+                                <PrintTypography display="inline" className={classes.additional} key={additional.id}>
+                                  {`c/ ${additional.amount}x ${additional.name}`}
+                                </PrintTypography>
+                              ))}
+                            </>
+                          )}
+                          {product.ingredients.length > 0 && (
+                            <>
+                              {product.ingredients.map(ingredient => (
+                                <PrintTypography display="inline" className={classes.ingredient} key={ingredient.id}>
+                                  {`s/ ${ingredient.name}`}
+                                </PrintTypography>
+                              ))}
+                            </>
+                          )}
+                        </div>
                         {product.complement_categories.length > 0 && (
                           <>
                             {product.complement_categories.map(category => (
