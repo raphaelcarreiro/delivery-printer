@@ -8,8 +8,6 @@ import { theme } from 'theme/theme';
 import Routes from './routes/Routes';
 import { store } from 'store/__index';
 
-// const store = configuredStore();
-
 const Root = () => (
   <Provider store={store}>
     <AuthProvider>
