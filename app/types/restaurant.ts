@@ -1,3 +1,5 @@
+import { Image } from './image';
+
 export interface RestaurantConfigs {
   print_by_product: boolean;
   print_only_shipment: boolean;
@@ -32,4 +34,5 @@ export interface Restaurant {
   working_hours: string;
   configs: RestaurantConfigs;
   printer_setting: PrinterSetting;
+  image: Image;
 }
