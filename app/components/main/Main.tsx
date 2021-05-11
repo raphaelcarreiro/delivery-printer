@@ -58,7 +58,7 @@ export default function Home(): JSX.Element {
       shipment: {
         ...order.shipment,
         formattedScheduledAt: order.shipment.scheduled_at
-          ? format(parseISO(order.shipment.scheduled_at), 'HH:mm')
+          ? format(parseISO(order.shipment.scheduled_at), 'dd/MM/yy p', { locale: ptbr })
           : null,
       },
     };

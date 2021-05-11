@@ -224,17 +224,14 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
             <PrintTypography>{order.formattedDate}</PrintTypography>
             <PrintTypography gutterBottom>{order.customer.name}</PrintTypography>
             {order.shipment.shipment_method === 'delivery' && (
-              <PrintTypography>
-                {`${order.shipment.address}, ${order.shipment.number},
-                ${order.shipment.district}, ${order.shipment.city},
-                ${order.shipment.region}`}
-              </PrintTypography>
+              <PrintTypography>{`${order.shipment.address}, nº ${order.shipment.number}, ${order.shipment.complement},
+                ${order.shipment.district}, ${order.shipment.city} - ${order.shipment.region}`}</PrintTypography>
             )}
             {order.shipment.shipment_method === 'customer_collect' && !order.shipment.scheduled_at ? (
-              <PrintTypography>**Cliente retira**</PrintTypography>
+              <PrintTypography bold>**Cliente retirará**</PrintTypography>
             ) : (
               order.shipment.scheduled_at && (
-                <PrintTypography>**Cliente retira ás {order.shipment.formattedScheduledAt}**</PrintTypography>
+                <PrintTypography bold>**Cliente retirará em {order.shipment.formattedScheduledAt}**</PrintTypography>
               )
             )}
             <table className={classes.headerProducts}>

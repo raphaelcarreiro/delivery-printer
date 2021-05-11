@@ -173,7 +173,9 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
             <PrintTypography gutterBottom>Cliente retira</PrintTypography>
           ) : (
             order.shipment.scheduled_at && (
-              <PrintTypography gutterBottom>Retirada ás {order.shipment.formattedScheduledAt}</PrintTypography>
+              <PrintTypography gutterBottom bold>
+                Retirada em {order.shipment.formattedScheduledAt}
+              </PrintTypography>
             )
           )}
           <div className={classes.customerData}>
@@ -188,9 +190,8 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
             <div className={classes.customerData}>
               <PrintTypography noWrap>Endereço</PrintTypography>
               <div>
-                <PrintTypography>{`${order.shipment.address}, nº ${order.shipment.number}`}</PrintTypography>
-                <PrintTypography>{order.shipment.district}</PrintTypography>
-                <PrintTypography>{order.shipment.complement}</PrintTypography>
+                <PrintTypography>{`${order.shipment.address}, nº ${order.shipment.number}, ${order.shipment.complement},
+                ${order.shipment.district}, ${order.shipment.city} - ${order.shipment.region}`}</PrintTypography>
               </div>
             </div>
           )}

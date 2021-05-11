@@ -260,10 +260,14 @@ const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
             </PrintTypography>
             <PrintTypography gutterBottom>{order.formattedDate}</PrintTypography>
             {order.shipment.shipment_method === 'customer_collect' && !order.shipment.scheduled_at ? (
-              <PrintTypography gutterBottom>Cliente retira</PrintTypography>
+              <PrintTypography gutterBottom bold>
+                **Cliente retirará**
+              </PrintTypography>
             ) : (
               order.shipment.scheduled_at && (
-                <PrintTypography gutterBottom>Retirada ás {order.shipment.formattedScheduledAt}</PrintTypography>
+                <PrintTypography gutterBottom bold>
+                  Retirada em {order.shipment.formattedScheduledAt}
+                </PrintTypography>
               )
             )}
             <div className={classes.customerData}>
@@ -278,9 +282,8 @@ const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
               <div className={classes.customerData}>
                 <PrintTypography>Endereço</PrintTypography>
                 <div>
-                  <PrintTypography>{`${order.shipment.address}, nº ${order.shipment.number}`}</PrintTypography>
-                  <PrintTypography>{order.shipment.district}</PrintTypography>
-                  <PrintTypography>{order.shipment.complement}</PrintTypography>
+                  <PrintTypography>{`${order.shipment.address}, nº ${order.shipment.number}, ${order.shipment.complement},
+                  ${order.shipment.district}, ${order.shipment.city} - ${order.shipment.region}`}</PrintTypography>
                 </div>
               </div>
             )}
