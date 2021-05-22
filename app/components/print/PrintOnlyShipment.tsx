@@ -24,7 +24,7 @@ const useStyles = makeStyles<Theme, UseStylesProps>({
       '&': {
         backgroundColor: 'transparent',
         border: 'none',
-        padding: 0,
+        padding: '0 0 0 10px',
         marginRight: 30,
       },
     },
