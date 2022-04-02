@@ -116,8 +116,8 @@ export default function Home(): JSX.Element {
     });
 
     socket.on('stored', (order: OrderData) => {
-      const formattedOrder = formatOrder(order);
-      setOrders(oldOrders => [...oldOrders, formattedOrder]);
+      // const formattedOrder = formatOrder(order);
+      // setOrders(oldOrders => [...oldOrders, formattedOrder]);
     });
 
     socket.on('printOrder', (order: OrderData) => {
