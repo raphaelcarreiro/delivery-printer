@@ -58,7 +58,7 @@ interface Product {
   complement_categories: ComplementCategory[];
 }
 
-interface Shipment {
+export interface Shipment {
   id: number;
   address: string;
   number: string;

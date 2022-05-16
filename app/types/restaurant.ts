@@ -9,6 +9,8 @@ export interface PrinterSetting {
   font_size: number;
   production_template_copies: number;
   shipment_template_copies: number;
+  no_margin: boolean;
+  max_width: number;
 }
 
 export interface Restaurant {

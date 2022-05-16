@@ -6,9 +6,11 @@ import PrintTypography from 'components/print-typography/PrintTypography';
 import { useSelector } from 'store/selector';
 import { Theme } from '@material-ui/core';
 import Complements from './Complements';
+import Address from './Address';
 
 interface UseStylesProps {
   fontSize: number;
+  noMargin: boolean;
 }
 
 const useStyles = makeStyles<Theme, UseStylesProps>({
@@ -23,7 +25,7 @@ const useStyles = makeStyles<Theme, UseStylesProps>({
       '&': {
         backgroundColor: 'transparent',
         border: 'none',
-        padding: '0 0 0 10px',
+        padding: props.noMargin ? '0 0 0 0' : '0 0 0 10px',
         marginRight: 30,
       },
     },
@@ -98,7 +100,8 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
   const restaurant = useSelector(state => state.restaurant);
 
   const classes = useStyles({
-    fontSize: restaurant ? restaurant.printer_setting.font_size : 14,
+    fontSize: restaurant?.printer_setting?.font_size || 14,
+    noMargin: !!restaurant?.printer_setting?.no_margin,
   });
   const [toPrint, setToPrint] = useState<OrderData | null>(null);
   const [printedQuantity, setPrintedQuantity] = useState(0);
@@ -190,8 +193,7 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
             <div className={classes.customerData}>
               <PrintTypography noWrap>Endereço</PrintTypography>
               <div>
-                <PrintTypography>{`${order.shipment.address}, nº ${order.shipment.number}, ${order.shipment.complement},
-                ${order.shipment.district}, ${order.shipment.city} - ${order.shipment.region}`}</PrintTypography>
+                <Address shipment={order.shipment} />
               </div>
             </div>
           )}

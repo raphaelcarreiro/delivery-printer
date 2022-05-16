@@ -7,14 +7,17 @@ import PrintTypography from 'components/print-typography/PrintTypography';
 import { Theme } from '@material-ui/core';
 import { useSelector } from 'store/selector';
 import Complements from './Complements';
+import Address from './Address';
 
 interface UseStylesProps {
   fontSize: number;
+  noMargin: boolean;
+  maxWidth: number;
 }
 
 const useStyles = makeStyles<Theme, UseStylesProps>({
   container: props => ({
-    maxWidth: '80mm',
+    maxWidth: `${props.maxWidth}mm`,
     minHeight: 300,
     padding: 15,
     fontSize: props.fontSize,
@@ -24,8 +27,8 @@ const useStyles = makeStyles<Theme, UseStylesProps>({
       '&': {
         backgroundColor: 'transparent',
         border: 'none',
-        padding: '0 0 0 10px',
-        marginRight: 30,
+        padding: props.noMargin ? '0 0 0 0' : '0 0 0 10px',
+        marginRight: 40,
       },
     },
   }),
@@ -61,7 +64,7 @@ const useStyles = makeStyles<Theme, UseStylesProps>({
   },
   customerData: {
     display: 'grid',
-    gridTemplateColumns: '75px 1fr',
+    gridTemplateColumns: '60px 1fr',
     marginBottom: 2,
     columnGap: 7,
   },
@@ -111,7 +114,9 @@ const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
   const restaurant = useSelector(state => state.restaurant);
 
   const classes = useStyles({
-    fontSize: restaurant ? restaurant.printer_setting.font_size : 14,
+    fontSize: restaurant?.printer_setting?.font_size || 14,
+    noMargin: !!restaurant?.printer_setting?.no_margin,
+    maxWidth: restaurant?.printer_setting?.max_width || 80,
   });
   const [printers, setPrinters] = useState<PrinterData[]>([]);
   const [toPrint, setToPrint] = useState<PrinterData[]>([]);
@@ -158,7 +163,7 @@ const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
       try {
         await api.post(`/orders/printed`, { order_id: order.id });
         console.log(`Alterado situação do pedido ${order.id}`);
-        handleClose();
+        // handleClose();
       } catch (err) {
         console.log(err);
         handleClose();
@@ -282,8 +287,7 @@ const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
               <div className={classes.customerData}>
                 <PrintTypography>Endereço</PrintTypography>
                 <div>
-                  <PrintTypography>{`${order.shipment.address}, nº ${order.shipment.number}, ${order.shipment.complement},
-                  ${order.shipment.district}, ${order.shipment.city} - ${order.shipment.region}`}</PrintTypography>
+                  <Address shipment={order.shipment} />
                 </div>
               </div>
             )}

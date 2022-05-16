@@ -7,9 +7,11 @@ import PrintTypography from 'components/print-typography/PrintTypography';
 import { Theme } from '@material-ui/core';
 import { useSelector } from 'store/selector';
 import Complements from './Complements';
+import Address from './Address';
 
 interface UseStylesProps {
   fontSize: number;
+  noMargin: boolean;
 }
 
 const useStyles = makeStyles<Theme, UseStylesProps>({
@@ -23,7 +25,7 @@ const useStyles = makeStyles<Theme, UseStylesProps>({
       '&': {
         backgroundColor: 'transparent',
         border: 'none',
-        padding: '0 0 0 10px',
+        padding: props.noMargin ? '0 0 0 0' : '0 0 0 10px',
         marginRight: 30,
       },
     },
@@ -73,7 +75,8 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
   const restaurant = useSelector(state => state.restaurant);
 
   const classes = useStyles({
-    fontSize: restaurant?.printer_setting.font_size || 14,
+    fontSize: restaurant?.printer_setting?.font_size || 14,
+    noMargin: !!restaurant?.printer_setting?.no_margin,
   });
 
   const [printers, setPrinters] = useState<PrinterData[]>([]);
@@ -223,10 +226,7 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
             </PrintTypography>
             <PrintTypography>{order.formattedDate}</PrintTypography>
             <PrintTypography gutterBottom>{order.customer.name}</PrintTypography>
-            {order.shipment.shipment_method === 'delivery' && (
-              <PrintTypography>{`${order.shipment.address}, nº ${order.shipment.number}, ${order.shipment.complement},
-                ${order.shipment.district}, ${order.shipment.city} - ${order.shipment.region}`}</PrintTypography>
-            )}
+            {order.shipment.shipment_method === 'delivery' && <Address shipment={order.shipment} />}
             {order.shipment.shipment_method === 'customer_collect' && !order.shipment.scheduled_at ? (
               <PrintTypography bold>**Cliente retirará**</PrintTypography>
             ) : (

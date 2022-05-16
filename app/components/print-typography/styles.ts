@@ -17,6 +17,7 @@ export const StyledPrintTypography = styled.p<StyledPrintTypographyProps>`
   line-height: 1.2em;
   color: #000;
   font-family: sans-serif;
+  word-break: break-word;
 
   ${props =>
     props.bold &&
