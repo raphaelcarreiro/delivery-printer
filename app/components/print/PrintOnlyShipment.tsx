@@ -163,7 +163,7 @@ const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
       try {
         await api.post(`/orders/printed`, { order_id: order.id });
         console.log(`Alterado situação do pedido ${order.id}`);
-        // handleClose();
+        handleClose();
       } catch (err) {
         console.log(err);
         handleClose();

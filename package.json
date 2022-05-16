@@ -99,7 +99,7 @@
       "provider": "github",
       "owner": "raphaelcarreiro",
       "repo": "delivery-printer",
-      "private": false
+      "private": true
     }
   },
   "repository": {
