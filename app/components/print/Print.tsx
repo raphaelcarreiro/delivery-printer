@@ -75,8 +75,8 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
   const restaurant = useSelector(state => state.restaurant);
 
   const classes = useStyles({
-    fontSize: restaurant?.printer_setting?.font_size || 14,
-    noMargin: !!restaurant?.printer_setting?.no_margin,
+    fontSize: restaurant?.printer_settings?.font_size || 14,
+    noMargin: !!restaurant?.printer_settings?.no_margin,
   });
 
   const [printers, setPrinters] = useState<PrinterData[]>([]);
@@ -84,7 +84,7 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
   const [printedQuantity, setPrintedQuantity] = useState(0);
 
   const copies = useMemo(() => {
-    return restaurant?.printer_setting.production_template_copies || 1;
+    return restaurant?.printer_settings.production_template_copies || 1;
   }, [restaurant]);
 
   // close if there is not printer in product

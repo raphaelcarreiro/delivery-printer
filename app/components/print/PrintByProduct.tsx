@@ -73,7 +73,7 @@ const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
   const restaurant = useSelector(state => state.restaurant);
 
   const classes = useStyles({
-    fontSize: restaurant?.printer_setting.font_size || 14,
+    fontSize: restaurant?.printer_settings.font_size || 14,
   });
 
   const [products, setProducts] = useState<ProductPrinterData[]>([]);

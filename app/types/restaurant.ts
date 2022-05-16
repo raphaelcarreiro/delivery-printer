@@ -35,6 +35,6 @@ export interface Restaurant {
   cover_id: number;
   working_hours: string;
   configs: RestaurantConfigs;
-  printer_setting: PrinterSetting;
+  printer_settings: PrinterSetting;
   image: Image;
 }
