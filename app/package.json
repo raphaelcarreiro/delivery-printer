@@ -1,7 +1,7 @@
 {
   "name": "delivery-printer",
   "productName": "delivery-printer",
-  "version": "1.4.4",
+  "version": "1.4.5",
   "description": "SGrande Delivery Printer",
   "main": "./main.prod.js",
   "author": {

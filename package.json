@@ -1,7 +1,7 @@
 {
   "name": "delivery-printer",
   "productName": "delivery-printer",
-  "version": "1.4.4",
+  "version": "1.4.5",
   "description": "Aplicação para impressão automática de pedidos",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
@@ -99,7 +99,7 @@
       "provider": "github",
       "owner": "raphaelcarreiro",
       "repo": "delivery-printer",
-      "private": false
+      "private": true
     }
   },
   "repository": {
