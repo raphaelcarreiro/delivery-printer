@@ -143,13 +143,13 @@ export default function Home(): JSX.Element {
   }, [restaurant, dispatch, formatOrder]);
 
   const handleOrderClose = useCallback(() => {
-    /* if (toPrint)
+    if (toPrint)
       setOrders(oldOrders =>
         oldOrders.map(order => {
           if (order.id === toPrint.id) order.printed = true;
           return order;
         }),
-      ); */
+      );
   }, [toPrint]);
 
   const handleShipmentClose = useCallback(() => {
