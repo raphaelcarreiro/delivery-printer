@@ -1,3 +1,5 @@
+import { BoardMovement } from './boardMovement';
+
 export interface PrinterData {
   id: number | string;
   name: string;
@@ -109,4 +111,8 @@ export interface OrderData {
   payment_method: PaymentMethod;
   deliverers: Deliverer[];
   printed: boolean;
+  sequence: number;
+  formattedSequence: string;
+  board_movement_id: number | null;
+  board_movement: BoardMovement | null;
 }

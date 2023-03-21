@@ -3,7 +3,7 @@ import { parseISO, formatDistanceStrict, format } from 'date-fns';
 import ptbr from 'date-fns/locale/pt-BR';
 import { useSelector } from 'store/selector';
 import InsideLoading from 'components/loading/InsideLoading';
-import io from 'socket.io-client/dist/socket.io';
+import { io, Socket } from 'socket.io-client/dist/socket.io';
 import { useAuth } from 'providers/auth';
 import constants from 'constants/constants';
 import { useDispatch } from 'react-redux';
@@ -18,7 +18,7 @@ import Status from '../status/Status';
 import { history } from 'services/history';
 import { OrderData } from 'types/order';
 
-const socket: SocketIOClient.Socket = io.connect(constants.WS_BASE_URL);
+const socket: Socket = io(constants.WS_BASE_URL);
 
 export default function Home(): JSX.Element {
   const [orders, setOrders] = useState<OrderData[]>([]);
@@ -39,6 +39,7 @@ export default function Home(): JSX.Element {
       ...order,
       printed: false,
       formattedId: formatId(order.id),
+      formattedSequence: formatId(order.sequence),
       formattedTotal: moneyFormat(order.total),
       formattedChange: moneyFormat(order.change - order.total),
       formattedChangeTo: moneyFormat(order.change),
@@ -116,8 +117,8 @@ export default function Home(): JSX.Element {
     });
 
     socket.on('stored', (order: OrderData) => {
-      // const formattedOrder = formatOrder(order);
-      // setOrders(oldOrders => [...oldOrders, formattedOrder]);
+      const formattedOrder = formatOrder(order);
+      setOrders(oldOrders => [...oldOrders, formattedOrder]);
     });
 
     socket.on('printOrder', (order: OrderData) => {
@@ -142,13 +143,13 @@ export default function Home(): JSX.Element {
   }, [restaurant, dispatch, formatOrder]);
 
   const handleOrderClose = useCallback(() => {
-    if (toPrint)
+    /* if (toPrint)
       setOrders(oldOrders =>
         oldOrders.map(order => {
           if (order.id === toPrint.id) order.printed = true;
           return order;
         }),
-      );
+      ); */
   }, [toPrint]);
 
   const handleShipmentClose = useCallback(() => {

@@ -169,18 +169,26 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
       {toPrint && !toPrint.printed && (
         <div className={classes.container}>
           <PrintTypography fontSize={1.2} bold gutterBottom>
-            PEDIDO {order.formattedId}
+            PEDIDO {order.formattedChange}
           </PrintTypography>
           <PrintTypography gutterBottom>{order.formattedDate}</PrintTypography>
-          {order.shipment.shipment_method === 'customer_collect' && !order.shipment.scheduled_at ? (
-            <PrintTypography gutterBottom>Cliente retira</PrintTypography>
-          ) : (
-            order.shipment.scheduled_at && (
-              <PrintTypography gutterBottom bold>
-                Retirada em {order.shipment.formattedScheduledAt}
-              </PrintTypography>
-            )
+
+          {order.shipment.shipment_method === 'customer_collect' && !order.shipment.scheduled_at && (
+            <PrintTypography gutterBottom bold>
+              **Cliente retirará**
+            </PrintTypography>
           )}
+
+          {order.shipment.scheduled_at && (
+            <PrintTypography gutterBottom bold>
+              **Cliente retirará ás {order.shipment.formattedScheduledAt}**
+            </PrintTypography>
+          )}
+
+          {order.board_movement && (
+            <PrintTypography bold>**Mesa {order.board_movement?.board?.number}**</PrintTypography>
+          )}
+
           <div className={classes.customerData}>
             <PrintTypography noWrap>Cliente</PrintTypography>
             <PrintTypography>{order.customer.name}</PrintTypography>

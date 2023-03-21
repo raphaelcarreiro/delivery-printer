@@ -7,6 +7,7 @@ import PrintTypography from 'components/print-typography/PrintTypography';
 import { Theme } from '@material-ui/core';
 import { useSelector } from 'store/selector';
 import Complements from './Complements';
+import Address from './Address';
 
 interface UseStylesProps {
   fontSize: number;
@@ -221,24 +222,24 @@ const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
         toPrint.map(printer => (
           <div className={classes.container} key={printer.id}>
             <PrintTypography fontSize={1.2} bold gutterBottom>
-              PEDIDO {order.formattedId}
+              PEDIDO {order.formattedSequence}
             </PrintTypography>
             <PrintTypography>{order.formattedDate}</PrintTypography>
             <PrintTypography gutterBottom>{order.customer.name}</PrintTypography>
-            {order.shipment.shipment_method === 'delivery' && (
-              <PrintTypography>
-                {`${order.shipment.address}, ${order.shipment.number},
-                ${order.shipment.district}, ${order.shipment.city},
-                ${order.shipment.region}`}
-              </PrintTypography>
+            {order.shipment.shipment_method === 'delivery' && <Address shipment={order.shipment} />}
+
+            {order.shipment.shipment_method === 'customer_collect' && !order.shipment.scheduled_at && (
+              <PrintTypography>**Cliente retirará**</PrintTypography>
             )}
-            {order.shipment.shipment_method === 'customer_collect' && !order.shipment.scheduled_at ? (
-              <PrintTypography>**Cliente retira**</PrintTypography>
-            ) : (
-              order.shipment.scheduled_at && (
-                <PrintTypography>**Cliente retira ás {order.shipment.formattedScheduledAt}**</PrintTypography>
-              )
+
+            {order.shipment.scheduled_at && (
+              <PrintTypography>**Cliente retirará ás {order.shipment.formattedScheduledAt}**</PrintTypography>
             )}
+
+            {order.board_movement && (
+              <PrintTypography bold>**Mesa {order.board_movement?.board?.number}**</PrintTypography>
+            )}
+
             <table className={classes.headerProducts}>
               <tbody>
                 <tr>

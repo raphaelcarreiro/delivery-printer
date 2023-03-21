@@ -222,18 +222,24 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
         toPrint.map(printer => (
           <div className={classes.container} key={printer.id}>
             <PrintTypography fontSize={1.2} bold gutterBottom>
-              PEDIDO {order.formattedId}
+              PEDIDO {order.formattedSequence}
             </PrintTypography>
             <PrintTypography>{order.formattedDate}</PrintTypography>
             <PrintTypography gutterBottom>{order.customer.name}</PrintTypography>
             {order.shipment.shipment_method === 'delivery' && <Address shipment={order.shipment} />}
-            {order.shipment.shipment_method === 'customer_collect' && !order.shipment.scheduled_at ? (
+
+            {order.shipment.shipment_method === 'customer_collect' && !order.shipment.scheduled_at && (
               <PrintTypography bold>**Cliente retirará**</PrintTypography>
-            ) : (
-              order.shipment.scheduled_at && (
-                <PrintTypography bold>**Cliente retirará em {order.shipment.formattedScheduledAt}**</PrintTypography>
-              )
             )}
+
+            {order.shipment.scheduled_at && (
+              <PrintTypography>**Cliente retirará ás {order.shipment.formattedScheduledAt}**</PrintTypography>
+            )}
+
+            {order.board_movement && (
+              <PrintTypography bold>**Mesa {order.board_movement?.board?.number}**</PrintTypography>
+            )}
+
             <table className={classes.headerProducts}>
               <tbody>
                 <tr>
