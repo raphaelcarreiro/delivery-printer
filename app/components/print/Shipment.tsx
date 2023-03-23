@@ -169,7 +169,7 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
       {toPrint && !toPrint.printed && (
         <div className={classes.container}>
           <PrintTypography fontSize={1.2} bold gutterBottom>
-            PEDIDO {order.formattedChange}
+            PEDIDO {order.formattedSequence}
           </PrintTypography>
           <PrintTypography gutterBottom>{order.formattedDate}</PrintTypography>
 
