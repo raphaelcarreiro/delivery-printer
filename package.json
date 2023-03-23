@@ -1,7 +1,7 @@
 {
   "name": "delivery-printer",
   "productName": "delivery-printer",
-  "version": "1.4.6",
+  "version": "1.4.7",
   "description": "Aplicação para impressão automática de pedidos",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
