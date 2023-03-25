@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Fragment, useMemo } from 'react';
+import React, { useEffect, useState, Fragment, useMemo, useCallback } from 'react';
 import { remote } from 'electron';
 import { makeStyles } from '@material-ui/styles';
 import { OrderData } from 'types/order';
@@ -103,27 +103,44 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
     fontSize: restaurant?.printer_settings?.font_size || 14,
     noMargin: !!restaurant?.printer_settings?.no_margin,
   });
-  const [toPrint, setToPrint] = useState<OrderData | null>(null);
+  const [toPrint, setToPrint] = useState<OrderData>(JSON.parse(JSON.stringify(order)));
   const [printedQuantity, setPrintedQuantity] = useState(0);
 
   const copies = useMemo(() => {
     return restaurant?.printer_settings.shipment_template_copies || 1;
   }, [restaurant]);
 
-  // get product printers
-  useEffect(() => {
-    if (order) {
-      setToPrint({
-        ...order,
-        printed: false,
-      });
-    }
-  }, [order]);
+  const print = useCallback((): Promise<boolean> => {
+    return new Promise((resolve, reject) => {
+      const [win] = remote.BrowserWindow.getAllWindows();
+
+      if (!win) {
+        reject(Error('Browser window not found'));
+      }
+
+      win.webContents.print(
+        {
+          color: false,
+          collate: false,
+          copies: 1,
+          silent: true,
+          margins: {
+            marginType: 'none',
+          },
+        },
+        (success, reason) => {
+          if (success) {
+            resolve(true);
+            return;
+          }
+
+          reject(reason);
+        },
+      );
+    });
+  }, []);
 
   useEffect(() => {
-    if (!toPrint) return;
-
-    // fecha se o pedido já foi impresso
     if (toPrint.printed) {
       handleClose();
       return;
@@ -137,32 +154,15 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
       return;
     }
 
-    const [win] = remote.BrowserWindow.getAllWindows();
-
-    if (!win) return;
-
-    try {
-      win.webContents.print(
-        {
-          color: false,
-          collate: false,
-          copies: 1,
-          silent: true,
-          margins: {
-            marginType: 'none',
-          },
-        },
-        success => {
-          if (!success) return;
-
-          setPrintedQuantity(state => state + 1);
-        },
-      );
-    } catch (err) {
-      console.log(err);
-      handleClose();
-    }
-  }, [toPrint, handleClose, copies, printedQuantity]);
+    print()
+      .then(() => {
+        setPrintedQuantity(state => state + 1);
+      })
+      .catch(err => {
+        console.error(err);
+        handleClose();
+      });
+  }, [toPrint, handleClose, copies, printedQuantity, print]);
 
   return (
     <>

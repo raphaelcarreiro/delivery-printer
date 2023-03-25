@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Fragment } from 'react';
+import React, { useEffect, useState, Fragment, useCallback } from 'react';
 import { remote } from 'electron';
 import { makeStyles } from '@material-ui/styles';
 import { OrderData, ProductPrinterData } from 'types/order';
@@ -80,6 +80,37 @@ const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
   const [products, setProducts] = useState<ProductPrinterData[]>([]);
   const [toPrint, setToPrint] = useState<ProductPrinterData[]>([]);
 
+  const print = useCallback((deviceName?: string): Promise<boolean> => {
+    return new Promise((resolve, reject) => {
+      const [win] = remote.BrowserWindow.getAllWindows();
+
+      if (!win) {
+        reject(Error('Browser window not found'));
+      }
+
+      win.webContents.print(
+        {
+          deviceName: deviceName || undefined,
+          color: false,
+          collate: false,
+          copies: 1,
+          silent: true,
+          margins: {
+            marginType: 'none',
+          },
+        },
+        (success, reason) => {
+          if (success) {
+            resolve(true);
+            return;
+          }
+
+          reject(reason);
+        },
+      );
+    });
+  }, []);
+
   // close if there is not printer in product
   useEffect(() => {
     const check = order.products.some(product => product.printer);
@@ -148,72 +179,37 @@ const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
 
   // print
   useEffect(() => {
-    if (toPrint.length > 0) {
-      const [win] = remote.BrowserWindow.getAllWindows();
-      const [printing] = toPrint;
-
-      if (!win) return;
-
-      let error = false;
-
-      try {
-        win.webContents.print(
-          {
-            deviceName: printing.name,
-            color: false,
-            collate: false,
-            copies: 1,
-            silent: true,
-            margins: {
-              marginType: 'none',
-            },
-          },
-          success => {
-            if (success) {
-              setProducts(oldValue =>
-                oldValue.map(p => {
-                  if (p.id === printing.id) p.printed = true;
-                  return p;
-                }),
-              );
-            }
-          },
-        );
-      } catch (err) {
-        console.log(err);
-        error = true;
-      }
-
-      // try to print in default printer
-      if (error) {
-        try {
-          win.webContents.print(
-            {
-              color: false,
-              collate: false,
-              copies: 1,
-              silent: true,
-              margins: {
-                marginType: 'none',
-              },
-            },
-            success => {
-              if (success) {
-                setProducts(oldValue =>
-                  oldValue.map(p => {
-                    if (p.id === printing.id) p.printed = true;
-                    return p;
-                  }),
-                );
-              }
-            },
-          );
-        } catch (err) {
-          console.log(err);
-          handleClose();
-        }
-      }
+    if (!toPrint.length) {
+      return;
     }
+
+    const [printing] = toPrint;
+
+    print(printing.name)
+      .then(() => {
+        setProducts(oldValue =>
+          oldValue.map(p => {
+            if (p.id === printing.id) p.printed = true;
+            return p;
+          }),
+        );
+      })
+      .catch(err => {
+        console.error(err);
+        print()
+          .then(() => {
+            setProducts(oldValue =>
+              oldValue.map(p => {
+                if (p.id === printing.id) p.printed = true;
+                return p;
+              }),
+            );
+          })
+          .catch(err => {
+            console.error(err);
+            handleClose();
+          });
+      });
   }, [toPrint, handleClose]);
 
   return (
