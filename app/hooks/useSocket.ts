@@ -1,12 +1,12 @@
 import constants from 'constants/constants';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useFormarOrder } from './useFormatOrder';
-import { io } from 'socket.io-client/dist/socket.io';
-import { Socket } from 'socket.io-client';
+import { Socket, io } from 'socket.io-client/dist/socket.io';
 import { useSelector } from 'store/selector';
 import { useDispatch } from 'react-redux';
 import { OrderData } from 'types/order';
 import { setRestaurantIsOpen } from 'store/modules/restaurant/actions';
+import { BoardControlMovement } from 'types/boardControlMovement';
 
 const socket: Socket = io(constants.WS_BASE_URL);
 
@@ -15,6 +15,7 @@ type UseSocket = [Socket, boolean];
 export function useSocket(
   setOrders: Dispatch<SetStateAction<OrderData[]>>,
   setShipment: Dispatch<SetStateAction<OrderData | null>>,
+  setBoardMovement: Dispatch<SetStateAction<BoardControlMovement | null>>,
 ): UseSocket {
   const formatOrder = useFormarOrder();
   const [connected, setConnected] = useState(socket.connected);
@@ -40,6 +41,12 @@ export function useSocket(
       setOrders(oldOrders => [...oldOrders, formattedOrder]);
     });
 
+    socket.on('print_board_billing', (movement: BoardControlMovement) => {
+      console.log(movement);
+
+      setBoardMovement(movement);
+    });
+
     socket.on('handleRestaurantState', (response: { isOpen: boolean }) => {
       dispatch(setRestaurantIsOpen(response.isOpen));
     });
@@ -49,8 +56,9 @@ export function useSocket(
       socket.off('printShipment');
       socket.off('printOrder');
       socket.off('stored');
+      socket.off('print_board_billing');
     };
-  }, [restaurant, dispatch, formatOrder]);
+  }, [restaurant, dispatch, formatOrder, setOrders, setBoardMovement]);
 
   useEffect(() => {
     if (!restaurant?.configs.print_only_shipment) {
@@ -63,7 +71,7 @@ export function useSocket(
     if (restaurant && connected) {
       socket.emit('register', restaurant.id);
     }
-  }, [connected, restaurant]);
+  }, [connected, restaurant, setShipment, formatOrder]);
 
   return [socket, connected];
 }

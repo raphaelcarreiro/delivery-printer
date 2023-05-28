@@ -6,7 +6,7 @@ import { OrderData } from 'types/order';
 
 export function useFormarOrder(): (order: OrderData) => OrderData {
   function formatId(id: number) {
-    return `#${`00000${id}`.slice(-6)}`;
+    return `#${`00${id}`.slice(-6)}`;
   }
 
   return useCallback((order: OrderData) => {
@@ -35,7 +35,7 @@ export function useFormarOrder(): (order: OrderData) => OrderData {
       shipment: {
         ...order.shipment,
         formattedScheduledAt: order.shipment.scheduled_at
-          ? format(parseISO(order.shipment.scheduled_at), 'dd/MM/yy p', { locale: ptBR })
+          ? format(parseISO(order.shipment.scheduled_at), 'p', { locale: ptBR })
           : null,
       },
     };

@@ -1,12 +1,13 @@
-import React, { useEffect, useState, Fragment, useMemo, useCallback } from 'react';
-import { remote } from 'electron';
+import React, { useEffect, useState, Fragment, useMemo } from 'react';
 import { makeStyles } from '@material-ui/styles';
 import { OrderData } from 'types/order';
-import PrintTypography from 'components/print-typography/PrintTypography';
 import { useSelector } from 'store/selector';
 import { Theme } from '@material-ui/core';
-import Complements from './Complements';
-import Address from './Address';
+import PrintTypography from '../base/print-typography/PrintTypography';
+import Header from './shared-parts/Header';
+import Address from './shared-parts/Address';
+import ComplementCategories from './shared-parts/ComplementCategories';
+import { usePrint } from 'hooks/usePrint';
 
 interface UseStylesProps {
   fontSize: number;
@@ -15,6 +16,7 @@ interface UseStylesProps {
 
 const useStyles = makeStyles<Theme, UseStylesProps>({
   container: props => ({
+    width: '100%',
     maxWidth: '80mm',
     minHeight: 300,
     padding: 15,
@@ -26,7 +28,7 @@ const useStyles = makeStyles<Theme, UseStylesProps>({
         backgroundColor: 'transparent',
         border: 'none',
         padding: props.noMargin ? '0 0 0 0' : '0 0 0 10px',
-        marginRight: 30,
+        marginRight: 0,
       },
     },
   }),
@@ -89,56 +91,32 @@ const useStyles = makeStyles<Theme, UseStylesProps>({
   developer: {
     marginTop: 15,
   },
+  header: {
+    textAlign: 'center',
+    borderBottom: '1px dashed #000',
+    paddingBottom: 10,
+    marginBottom: 10,
+  },
 });
 
-interface PrintProps {
+interface DispatchedOrderProps {
   handleClose(): void;
-  order: OrderData;
+  data: OrderData;
 }
 
-const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
+const DispatchedOrder: React.FC<DispatchedOrderProps> = ({ handleClose, data }) => {
   const restaurant = useSelector(state => state.restaurant);
-
+  const order = useMemo(() => JSON.parse(JSON.stringify(data)), [data]);
   const classes = useStyles({
     fontSize: restaurant?.printer_settings?.font_size || 14,
     noMargin: !!restaurant?.printer_settings?.no_margin,
   });
   const [toPrint, setToPrint] = useState<OrderData>(JSON.parse(JSON.stringify(order)));
   const [printedQuantity, setPrintedQuantity] = useState(0);
-
+  const { print } = usePrint();
   const copies = useMemo(() => {
     return restaurant?.printer_settings.shipment_template_copies || 1;
   }, [restaurant]);
-
-  const print = useCallback((): Promise<boolean> => {
-    return new Promise((resolve, reject) => {
-      const [win] = remote.BrowserWindow.getAllWindows();
-
-      if (!win) {
-        reject(Error('Browser window not found'));
-      }
-
-      win.webContents.print(
-        {
-          color: false,
-          collate: false,
-          copies: 1,
-          silent: true,
-          margins: {
-            marginType: 'none',
-          },
-        },
-        (success, reason) => {
-          if (success) {
-            resolve(true);
-            return;
-          }
-
-          reject(reason);
-        },
-      );
-    });
-  }, []);
 
   useEffect(() => {
     if (toPrint.printed) {
@@ -162,32 +140,15 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
         console.error(err);
         handleClose();
       });
-  }, [toPrint, handleClose, copies, printedQuantity, print]);
+  }, [toPrint, handleClose, copies, printedQuantity]);
 
   return (
     <>
       {toPrint && !toPrint.printed && (
         <div className={classes.container}>
-          <PrintTypography fontSize={1.2} bold gutterBottom>
-            PEDIDO {order.formattedSequence}
-          </PrintTypography>
+          <Header formattedSequence={order.formattedSequence} shipment={order.shipment} />
+
           <PrintTypography gutterBottom>{order.formattedDate}</PrintTypography>
-
-          {order.shipment.shipment_method === 'customer_collect' && !order.shipment.scheduled_at && (
-            <PrintTypography gutterBottom bold>
-              **Cliente retirará**
-            </PrintTypography>
-          )}
-
-          {order.shipment.scheduled_at && (
-            <PrintTypography gutterBottom bold>
-              **Cliente retirará ás {order.shipment.formattedScheduledAt}**
-            </PrintTypography>
-          )}
-
-          {order.board_movement && (
-            <PrintTypography bold>**Mesa {order.board_movement?.board?.number}**</PrintTypography>
-          )}
 
           <div className={classes.customerData}>
             <PrintTypography noWrap>Cliente</PrintTypography>
@@ -229,20 +190,8 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
                       <PrintTypography upperCase bold>
                         {product.name} - {product.formattedFinalPrice}
                       </PrintTypography>
-                      {product.complement_categories.length > 0 && (
-                        <>
-                          {product.complement_categories.map(category => (
-                            <Fragment key={category.id}>
-                              {category.complements.length > 0 && (
-                                <div className={classes.complementCategory}>
-                                  <PrintTypography italic>{category.print_name || category.name}</PrintTypography>
-                                  <Complements complementCategory={category} />
-                                </div>
-                              )}
-                            </Fragment>
-                          ))}
-                        </>
-                      )}
+
+                      <ComplementCategories categories={product.complement_categories} />
                     </td>
                   </tr>
                 ))}
@@ -253,9 +202,7 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
             <div>
               <PrintTypography>Pagamento</PrintTypography>
             </div>
-            <div>
-              <PrintTypography>{order.payment_method.method}</PrintTypography>
-            </div>
+            <div>{order.payment_method.mode === 'online' ? `Online` : order.payment_method.method}</div>
             {order.discount > 0 && (
               <>
                 <div>
@@ -293,7 +240,7 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
               </>
             )}
             <div>
-              <PrintTypography>Total a pagar</PrintTypography>
+              <PrintTypography>{order.payment_method.mode === 'online' ? 'Total' : 'Total a pagar'}</PrintTypography>
             </div>
             <div>
               <PrintTypography fontSize={1.2} bold>
@@ -326,4 +273,4 @@ const Shipment: React.FC<PrintProps> = ({ handleClose, order }) => {
   );
 };
 
-export default Shipment;
+export default DispatchedOrder;

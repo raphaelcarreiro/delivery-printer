@@ -17,13 +17,13 @@ export interface ProductPrinterData {
   currentAmount: number;
 }
 
-interface Additional {
+export interface Additional {
   id: number;
   name: string;
   amount: number;
 }
 
-interface Ingredient {
+export interface Ingredient {
   id: number;
   name: string;
 }
@@ -45,7 +45,7 @@ interface Complement {
 type ComplementAdditional = Additional;
 type ComplementIngredient = Ingredient;
 
-interface Product {
+export interface Product {
   id: number;
   name: string;
   final_price: number;
@@ -81,6 +81,7 @@ interface Customer {
 interface PaymentMethod {
   id: number;
   method: string;
+  mode: 'online' | 'offline';
 }
 
 interface Deliverer {

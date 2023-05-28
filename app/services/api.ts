@@ -1,4 +1,4 @@
-import axios, { CancelTokenSource, AxiosError } from 'axios';
+import axios, { CancelTokenSource } from 'axios';
 import constants from 'constants/constants';
 import { history } from './history';
 
@@ -9,11 +9,18 @@ const api = axios.create({
 api.interceptors.request.use(
   config => {
     const token = localStorage.getItem('token');
-    if (token) config.headers.Authorization = `Bearer ${token}`;
+
+    if (config.headers) {
+      config.headers.App = 'admin';
+    }
+
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
 
     return config;
   },
-  (err: AxiosError) => {
+  err => {
     return Promise.reject(err);
   },
 );
@@ -24,12 +31,13 @@ api.interceptors.response.use(
   },
   err => {
     const token = localStorage.getItem('token');
-    if (token)
-      if (err.response && err.response.status === 401) {
-        localStorage.removeItem('token');
-        history.push('/login');
-        return;
-      }
+
+    if (token && err?.response?.status === 401) {
+      localStorage.removeItem('token');
+      history.push('/login');
+      return;
+    }
+
     return Promise.reject(err);
   },
 );

@@ -13,7 +13,5 @@
     "postinstall": "yarn electron-rebuild"
   },
   "license": "MIT",
-  "dependencies": {
-    "socket.io-client": "^4.6.1"
-  }
+  "dependencies": {}
 }

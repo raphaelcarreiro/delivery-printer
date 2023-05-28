@@ -1,13 +1,15 @@
-import React, { useEffect, useState, Fragment, useCallback } from 'react';
-import { remote } from 'electron';
+import React, { useEffect, useState, useMemo } from 'react';
 import { makeStyles } from '@material-ui/styles';
 import { OrderData, ProductPrinterData } from 'types/order';
-import { api } from 'services/api';
-import PrintTypography from 'components/print-typography/PrintTypography';
 import { Theme } from '@material-ui/core';
 import { useSelector } from 'store/selector';
-import Complements from './Complements';
-import Address from './Address';
+import PrintTypography from '../base/print-typography/PrintTypography';
+import Address from './shared-parts/Address';
+import Additional from './shared-parts/Additional';
+import Ingredients from './shared-parts/Ingredients';
+import ComplementCategories from './shared-parts/ComplementCategories';
+import { useSetOrderPrinted } from 'hooks/useSetOrderPrinted';
+import { usePrint } from 'hooks/usePrint';
 
 interface UseStylesProps {
   fontSize: number;
@@ -16,6 +18,7 @@ interface UseStylesProps {
 const useStyles = makeStyles<Theme, UseStylesProps>({
   container: props => ({
     maxWidth: '80mm',
+    width: '100%',
     padding: '15px 15px 30px 15px',
     backgroundColor: '#faebd7',
     border: '2px dashed #ccc',
@@ -25,22 +28,13 @@ const useStyles = makeStyles<Theme, UseStylesProps>({
         backgroundColor: 'transparent',
         border: 'none',
         padding: '0 0 0 10px',
-        marginRight: 30,
+        marginRight: 0,
       },
     },
   }),
   products: {
     padding: '7px 0 0',
     borderTop: '1px dashed #333',
-  },
-  complement: {
-    marginLeft: 6,
-  },
-  additional: {
-    marginRight: 6,
-  },
-  ingredient: {
-    marginRight: 6,
   },
   headerProducts: {
     marginTop: 7,
@@ -55,67 +49,36 @@ const useStyles = makeStyles<Theme, UseStylesProps>({
     display: 'flex',
     paddingTop: 0,
   },
-  complementCategory: {
-    display: 'grid',
-    gridTemplateColumns: '0.5fr 1fr',
-  },
   additionalInfoContainer: {
     display: 'flex',
     flexWrap: 'wrap',
   },
 });
 
-interface PrintProps {
+interface ApprovedOrderSplittedByProductProps {
   handleClose(): void;
-  order: OrderData;
+  data: OrderData;
 }
 
-const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
+const ApprovedOrderSplittedByProduct: React.FC<ApprovedOrderSplittedByProductProps> = ({ handleClose, data }) => {
   const restaurant = useSelector(state => state.restaurant);
-
+  const order = useMemo(() => JSON.parse(JSON.stringify(data)), [data]);
   const classes = useStyles({
     fontSize: restaurant?.printer_settings.font_size || 14,
   });
-
+  const { print } = usePrint();
   const [products, setProducts] = useState<ProductPrinterData[]>([]);
   const [toPrint, setToPrint] = useState<ProductPrinterData[]>([]);
-
-  const print = useCallback((deviceName?: string): Promise<boolean> => {
-    return new Promise((resolve, reject) => {
-      const [win] = remote.BrowserWindow.getAllWindows();
-
-      if (!win) {
-        reject(Error('Browser window not found'));
-      }
-
-      win.webContents.print(
-        {
-          deviceName: deviceName || undefined,
-          color: false,
-          collate: false,
-          copies: 1,
-          silent: true,
-          margins: {
-            marginType: 'none',
-          },
-        },
-        (success, reason) => {
-          if (success) {
-            resolve(true);
-            return;
-          }
-
-          reject(reason);
-        },
-      );
-    });
-  }, []);
+  const { setOrderAsPrinted } = useSetOrderPrinted(handleClose, order.id);
 
   // close if there is not printer in product
   useEffect(() => {
     const check = order.products.some(product => product.printer);
-    if (!check) handleClose();
-  }, [handleClose, order]);
+
+    if (!check) {
+      setOrderAsPrinted();
+    }
+  }, [setOrderAsPrinted, order]);
 
   // get product printers
   useEffect(() => {
@@ -152,30 +115,19 @@ const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
   }, [order]);
 
   useEffect(() => {
-    async function setPrinted() {
-      try {
-        await api.post(`/orders/printed`, { order_id: order.id });
-        console.log(`Alterado situação do pedido ${order.id}`);
-        handleClose();
-      } catch (err) {
-        console.log(err);
-        handleClose();
-      }
-    }
-
     if (products.length > 0) {
       const tp = products.find(p => !p.printed);
 
       // close if all order products had been printed
       if (!tp) {
         const check = products.every(p => p.printed);
-        if (check) setPrinted();
+        if (check) setOrderAsPrinted();
         return;
       }
 
       setToPrint([tp]);
     }
-  }, [products, handleClose, order]);
+  }, [products, setOrderAsPrinted, order]);
 
   // print
   useEffect(() => {
@@ -260,43 +212,17 @@ const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
                         <PrintTypography upperCase bold>
                           {product.name}
                         </PrintTypography>
+
                         {product.annotation && (
                           <PrintTypography fontSize={0.8}>Obs: {product.annotation}</PrintTypography>
                         )}
+
                         <div className={classes.additionalInfoContainer}>
-                          {product.additional.length > 0 && (
-                            <>
-                              {product.additional.map(additional => (
-                                <PrintTypography display="inline" className={classes.additional} key={additional.id}>
-                                  {`c/ ${additional.amount}x ${additional.name}`}
-                                </PrintTypography>
-                              ))}
-                            </>
-                          )}
-                          {product.ingredients.length > 0 && (
-                            <>
-                              {product.ingredients.map(ingredient => (
-                                <PrintTypography display="inline" className={classes.ingredient} key={ingredient.id}>
-                                  {`s/ ${ingredient.name}`}
-                                </PrintTypography>
-                              ))}
-                            </>
-                          )}
+                          <Additional additional={product.additional} />
+                          <Ingredients ingredients={product.ingredients} />
                         </div>
-                        {product.complement_categories.length > 0 && (
-                          <>
-                            {product.complement_categories.map(category => (
-                              <Fragment key={category.id}>
-                                {category.complements.length > 0 && (
-                                  <div className={classes.complementCategory}>
-                                    <PrintTypography italic>{category.print_name || category.name}</PrintTypography>
-                                    <Complements complementCategory={category} />
-                                  </div>
-                                )}
-                              </Fragment>
-                            ))}
-                          </>
-                        )}
+
+                        <ComplementCategories categories={product.complement_categories} />
                       </td>
                     </tr>
                   ))}
@@ -310,4 +236,4 @@ const PrintByProduct: React.FC<PrintProps> = ({ handleClose, order }) => {
   );
 };
 
-export default PrintByProduct;
+export default ApprovedOrderSplittedByProduct;

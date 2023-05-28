@@ -1,10 +1,14 @@
 import React, { MouseEvent } from 'react';
-import { makeStyles, Typography, Avatar } from '@material-ui/core';
+import { makeStyles, Typography, Avatar, Theme } from '@material-ui/core';
 import { useSelector } from 'store/selector';
 import RestaurantStatus from 'components/restaurant-status/RestaurantStatus';
-import packageJson from '../../package.json';
+import packageJson from '../../../package.json';
 
-const useStyles = makeStyles(theme => ({
+type UseStylesProps = {
+  isConnected: boolean;
+};
+
+const useStyles = makeStyles<Theme, UseStylesProps>(theme => ({
   container: {
     display: 'flex',
     justifyContent: 'center',
@@ -31,17 +35,21 @@ const useStyles = makeStyles(theme => ({
     display: 'flex',
     alignItems: 'center',
   },
-  logo: {
-    width: 75,
+  logo: props => ({
+    width: 100,
     height: 'auto',
-    marginBottom: 20,
-  },
+    border: `2px solid ${props.isConnected ? theme.palette.success.main : theme.palette.error.main}`,
+    borderRadius: '50%',
+    padding: 5,
+    marginRight: 10,
+  }),
   avatar: {
     width: 60,
     marginRight: 10,
     border: `2px solid ${theme.palette.primary.main}`,
     height: 60,
     borderRadius: 30,
+    objectFit: 'cover',
   },
   linkLogout: {
     cursor: 'pointer',
@@ -49,6 +57,17 @@ const useStyles = makeStyles(theme => ({
     marginTop: 2,
     display: 'inline-block',
     fontSize: 14,
+  },
+  logoContent: {
+    display: 'flex',
+    gap: '20px',
+    alignItems: 'center',
+  },
+  version: {
+    borderTop: '1px solid #eee',
+    width: 400,
+    paddingTop: 15,
+    textAlign: 'center',
   },
 }));
 
@@ -58,8 +77,8 @@ interface StatusProps {
 }
 
 const Status: React.FC<StatusProps> = ({ wsConnected, handleLogout }) => {
-  const classes = useStyles();
   const restaurant = useSelector(state => state.restaurant);
+  const classes = useStyles({ isConnected: !!restaurant?.is_open });
   const user = useSelector(state => state.user);
 
   function handleClick(e: MouseEvent<HTMLAnchorElement>) {
@@ -69,9 +88,16 @@ const Status: React.FC<StatusProps> = ({ wsConnected, handleLogout }) => {
 
   return (
     <div className={classes.container}>
-      <img className={classes.logo} src={restaurant?.image.imageUrl} alt="logo do restaurante" />
-      <Typography variant="h4">{restaurant?.name}</Typography>
-      <RestaurantStatus wsConnected={wsConnected} />
+      <div className={classes.logoContent}>
+        <img className={classes.logo} src={restaurant?.image.imageUrl} alt="logo do restaurante" />
+        <div>
+          <Typography variant="h4">{restaurant?.name}</Typography>
+          <Typography variant="body1" color="textSecondary">
+            {restaurant?.description}
+          </Typography>
+          <RestaurantStatus wsConnected={wsConnected} />
+        </div>
+      </div>
       {user.id && (
         <div className={classes.user}>
           {user.image ? (
@@ -91,8 +117,8 @@ const Status: React.FC<StatusProps> = ({ wsConnected, handleLogout }) => {
           </div>
         </div>
       )}
-      <div>
-        <Typography>versão {packageJson.version}</Typography>
+      <div className={classes.version}>
+        <Typography color="textSecondary">SGrande Delivery Printer - v{packageJson.version} - ia32</Typography>
       </div>
     </div>
   );

@@ -1,13 +1,15 @@
-import React, { useEffect, useState, Fragment, useMemo, useCallback } from 'react';
-import { remote } from 'electron';
+import React, { useEffect, useState, useMemo } from 'react';
 import { makeStyles } from '@material-ui/styles';
 import { OrderData, PrinterData } from 'types/order';
-import { api } from 'services/api';
-import PrintTypography from 'components/print-typography/PrintTypography';
 import { Theme } from '@material-ui/core';
 import { useSelector } from 'store/selector';
-import Complements from './Complements';
-import Address from './Address';
+import PrintTypography from '../base/print-typography/PrintTypography';
+import Additional from './shared-parts/Additional';
+import Address from './shared-parts/Address';
+import Ingredients from './shared-parts/Ingredients';
+import ComplementCategories from './shared-parts/ComplementCategories';
+import { useSetOrderPrinted } from 'hooks/useSetOrderPrinted';
+import { usePrint } from 'hooks/usePrint';
 
 interface UseStylesProps {
   fontSize: number;
@@ -17,6 +19,7 @@ interface UseStylesProps {
 const useStyles = makeStyles<Theme, UseStylesProps>({
   container: props => ({
     maxWidth: '80mm',
+    width: '100%',
     padding: '15px 15px 30px 15px',
     backgroundColor: '#faebd7',
     border: '2px dashed #ccc',
@@ -26,22 +29,13 @@ const useStyles = makeStyles<Theme, UseStylesProps>({
         backgroundColor: 'transparent',
         border: 'none',
         padding: props.noMargin ? '0 0 0 0' : '0 0 0 10px',
-        marginRight: 30,
+        marginRight: 0,
       },
     },
   }),
   products: {
     padding: '7px 0 0',
     borderTop: '1px dashed #333',
-  },
-  complement: {
-    marginLeft: 6,
-  },
-  additional: {
-    marginRight: 6,
-  },
-  ingredient: {
-    marginRight: 6,
   },
   headerProducts: {
     marginTop: 7,
@@ -56,24 +50,27 @@ const useStyles = makeStyles<Theme, UseStylesProps>({
     display: 'flex',
     paddingTop: 0,
   },
-  complementCategory: {
-    display: 'grid',
-    gridTemplateColumns: '0.5fr 1fr',
-  },
   additionalInfoContainer: {
-    display: 'flex',
+    // display: 'flex',
     flexWrap: 'wrap',
+    columnGap: 5,
+  },
+  header: {
+    textAlign: 'center',
+    borderBottom: '1px dashed #000',
+    paddingBottom: 10,
+    marginBottom: 10,
   },
 });
 
-interface PrintProps {
+interface ApprovedBoardOrderProps {
   handleClose(): void;
-  order: OrderData;
+  data: OrderData;
 }
 
-const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
+const ApprovedBoardOrder: React.FC<ApprovedBoardOrderProps> = ({ handleClose, data }) => {
   const restaurant = useSelector(state => state.restaurant);
-
+  const order = useMemo(() => JSON.parse(JSON.stringify(data)), [data]);
   const classes = useStyles({
     fontSize: restaurant?.printer_settings?.font_size || 14,
     noMargin: !!restaurant?.printer_settings?.no_margin,
@@ -82,47 +79,21 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
   const [printers, setPrinters] = useState<PrinterData[]>([]);
   const [toPrint, setToPrint] = useState<PrinterData[]>([]);
   const [printedQuantity, setPrintedQuantity] = useState(0);
+  const { setOrderAsPrinted } = useSetOrderPrinted(handleClose, order.id);
+  const { print } = usePrint();
 
   const copies = useMemo(() => {
     return restaurant?.printer_settings.production_template_copies || 1;
   }, [restaurant]);
 
-  const print = useCallback((deviceName?: string): Promise<boolean> => {
-    return new Promise((resolve, reject) => {
-      const [win] = remote.BrowserWindow.getAllWindows();
-
-      if (!win) {
-        reject(Error('Browser window not found'));
-      }
-
-      win.webContents.print(
-        {
-          deviceName: deviceName || undefined,
-          color: false,
-          collate: false,
-          copies: 1,
-          silent: true,
-          margins: {
-            marginType: 'none',
-          },
-        },
-        (success, reason) => {
-          if (success) {
-            resolve(true);
-            return;
-          }
-
-          reject(reason);
-        },
-      );
-    });
-  }, []);
-
   // close if there is not printer in product
   useEffect(() => {
     const check = order.products.some(product => product.printer);
-    if (!check) handleClose();
-  }, [handleClose, order]);
+
+    if (!check) {
+      setOrderAsPrinted();
+    }
+  }, [setOrderAsPrinted, order]);
 
   // get product printers
   useEffect(() => {
@@ -151,31 +122,20 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
   }, [order]);
 
   useEffect(() => {
-    async function setPrinted() {
-      try {
-        await api.post(`/orders/printed`, { order_id: order.id });
-        console.log(`Alterado situação do pedido ${order.id}`);
-        handleClose();
-      } catch (err) {
-        console.log(err);
-        handleClose();
-      }
-    }
-
     if (printers.length > 0) {
       const tp = printers.find(p => !p.printed);
 
       // close if all order products had been printed
       if (!tp) {
         const check = printers.every(p => p.printed);
-        if (check) setPrinted();
+        if (check) setOrderAsPrinted();
         return;
       }
 
       setToPrint([tp]);
       setPrintedQuantity(0);
     }
-  }, [printers, handleClose, order]);
+  }, [printers, setOrderAsPrinted, order]);
 
   // print
   useEffect(() => {
@@ -208,18 +168,27 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
             handleClose();
           });
       });
-  }, [toPrint, handleClose, copies, printedQuantity, print]);
+  }, [toPrint, handleClose, copies, printedQuantity]);
 
   return (
     <>
       {toPrint.length > 0 &&
         toPrint.map(printer => (
           <div className={classes.container} key={printer.id}>
-            <PrintTypography fontSize={1.2} bold gutterBottom>
+            <div className={classes.header}>
+              <PrintTypography fontSize={1.2} bold>
+                MESA {order.board_movement?.board?.number}
+              </PrintTypography>
+            </div>
+
+            <PrintTypography bold gutterBottom>
               PEDIDO {order.formattedSequence}
             </PrintTypography>
+
             <PrintTypography>{order.formattedDate}</PrintTypography>
+
             <PrintTypography gutterBottom>{order.customer.name}</PrintTypography>
+
             {order.shipment.shipment_method === 'delivery' && <Address shipment={order.shipment} />}
 
             {order.shipment.shipment_method === 'customer_collect' && !order.shipment.scheduled_at && (
@@ -228,10 +197,6 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
 
             {order.shipment.scheduled_at && (
               <PrintTypography>**Cliente retirará ás {order.shipment.formattedScheduledAt}**</PrintTypography>
-            )}
-
-            {order.board_movement && (
-              <PrintTypography bold>**Mesa {order.board_movement?.board?.number}**</PrintTypography>
             )}
 
             <table className={classes.headerProducts}>
@@ -254,47 +219,22 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
                       <td className={classes.productAmount}>
                         <PrintTypography>{product.amount}x</PrintTypography>
                       </td>
+
                       <td className={classes.product}>
                         <PrintTypography upperCase bold>
                           {product.name}
                         </PrintTypography>
+
                         {product.annotation && (
                           <PrintTypography fontSize={0.8}>Obs: {product.annotation}</PrintTypography>
                         )}
+
                         <div className={classes.additionalInfoContainer}>
-                          {product.additional.length > 0 && (
-                            <>
-                              {product.additional.map(additional => (
-                                <PrintTypography display="inline" className={classes.additional} key={additional.id}>
-                                  {`c/ ${additional.amount}x ${additional.name}`}
-                                </PrintTypography>
-                              ))}
-                            </>
-                          )}
-                          {product.ingredients.length > 0 && (
-                            <>
-                              {product.ingredients.map(ingredient => (
-                                <PrintTypography display="inline" className={classes.ingredient} key={ingredient.id}>
-                                  {`s/ ${ingredient.name}`}
-                                </PrintTypography>
-                              ))}
-                            </>
-                          )}
+                          <Additional additional={product.additional} />
+                          <Ingredients ingredients={product.ingredients} />
                         </div>
-                        {product.complement_categories.length > 0 && (
-                          <>
-                            {product.complement_categories.map(category => (
-                              <Fragment key={category.id}>
-                                {category.complements.length > 0 && (
-                                  <div className={classes.complementCategory}>
-                                    <PrintTypography italic>{category.print_name || category.name}</PrintTypography>
-                                    <Complements complementCategory={category} />
-                                  </div>
-                                )}
-                              </Fragment>
-                            ))}
-                          </>
-                        )}
+
+                        <ComplementCategories categories={product.complement_categories} />
                       </td>
                     </tr>
                   ))}
@@ -308,4 +248,4 @@ const Print: React.FC<PrintProps> = ({ handleClose, order }) => {
   );
 };
 
-export default Print;
+export default ApprovedBoardOrder;

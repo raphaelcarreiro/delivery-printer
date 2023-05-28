@@ -276,6 +276,7 @@
     "react-redux": "^7.2.0",
     "react-router-dom": "^5.2.0",
     "redux": "^4.0.5",
+    "socket.io-client": "^4.6.1",
     "source-map-support": "^0.5.19",
     "styled-components": "^5.2.3"
   },

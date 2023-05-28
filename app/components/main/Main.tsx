@@ -1,17 +1,20 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector } from 'store/selector';
-import InsideLoading from 'components/loading/InsideLoading';
 import { useAuth } from 'providers/auth';
 import { api } from 'services/api';
-import Shipment from 'components/print/Shipment';
-import PrintByProduct from 'components/print/PrintByProduct';
-import Print from 'components/print/Print';
-import PrintOnlyShipment from 'components/print/PrintOnlyShipment';
 import Status from '../status/Status';
 import { history } from 'services/history';
 import { OrderData } from 'types/order';
 import { useFormarOrder } from 'hooks/useFormatOrder';
 import { useSocket } from 'hooks/useSocket';
+import InsideLoading from '../loading/InsideLoading';
+import { BoardControlMovement } from 'types/boardControlMovement';
+import ApprovedOrderSplittedByProduct from '../printing-layouts/ApprovedOrderSplittedByProduct';
+import DispatchedOrderOnly from '../printing-layouts/DispatchedOrderOnly';
+import ApprovedBoardOrder from '../printing-layouts/ApprovedBoardOrder';
+import ApprovedOrder from '../printing-layouts/ApprovedOrder';
+import DispatchedOrder from '../printing-layouts/DispatchedOrder';
+import BoardBilling from '../printing-layouts/board-billing/BoardBilling';
 
 const Home: React.FC = () => {
   const [orders, setOrders] = useState<OrderData[]>([]);
@@ -20,7 +23,10 @@ const Home: React.FC = () => {
   const restaurant = useSelector(state => state.restaurant);
   const auth = useAuth();
   const formatOrder = useFormarOrder();
-  const [socket, wsConnected] = useSocket(setOrders, setShipment);
+  const [boardMovement, setBoardMovement] = useState<BoardControlMovement | null>(null);
+  const [socket, wsConnected] = useSocket(setOrders, setShipment, setBoardMovement);
+
+  console.log(orders);
 
   useEffect(() => {
     async function getOrders() {
@@ -56,19 +62,20 @@ const Home: React.FC = () => {
     }
   }, [orders]);
 
-  const handleOrderClose = useCallback(() => {
-    if (toPrint)
-      setOrders(oldOrders =>
-        oldOrders.map(order => {
-          if (order.id === toPrint.id) order.printed = true;
-          return order;
-        }),
-      );
-  }, [toPrint]);
+  const handleClose = useCallback(() => {
+    if (!toPrint) {
+      return;
+    }
 
-  const handleShipmentClose = useCallback(() => {
-    if (shipment) setShipment(null);
-  }, [shipment]);
+    setOrders(state =>
+      state.map(order => {
+        if (order.id === toPrint.id) {
+          order.printed = true;
+        }
+        return order;
+      }),
+    );
+  }, [toPrint]);
 
   function handleLogout() {
     auth.logout().then(() => {
@@ -77,20 +84,26 @@ const Home: React.FC = () => {
     });
   }
 
-  if (auth.loading) return <InsideLoading />;
+  if (auth.loading) {
+    return <InsideLoading />;
+  }
 
   return (
     <>
-      {toPrint && !toPrint.printed ? (
+      {toPrint ? (
         restaurant?.configs.print_by_product ? (
-          <PrintByProduct handleClose={handleOrderClose} order={toPrint} />
+          <ApprovedOrderSplittedByProduct handleClose={handleClose} data={toPrint} />
+        ) : toPrint.board_movement_id ? (
+          <ApprovedBoardOrder handleClose={handleClose} data={toPrint} />
         ) : restaurant?.configs.print_only_shipment ? (
-          <PrintOnlyShipment order={toPrint} handleClose={handleOrderClose} />
+          <DispatchedOrderOnly data={toPrint} handleClose={handleClose} />
         ) : (
-          <Print handleClose={handleOrderClose} order={toPrint} />
+          <ApprovedOrder handleClose={handleClose} data={toPrint} />
         )
-      ) : shipment && !shipment.printed ? (
-        <Shipment order={shipment} handleClose={handleShipmentClose} />
+      ) : shipment ? (
+        <DispatchedOrder data={shipment} handleClose={() => setShipment(null)} />
+      ) : boardMovement ? (
+        <BoardBilling movement={boardMovement} handleClose={() => setBoardMovement(null)} />
       ) : (
         <Status wsConnected={wsConnected} handleLogout={handleLogout} />
       )}

@@ -1,6 +1,6 @@
-import PrintTypography from 'components/print-typography/PrintTypography';
 import React, { useMemo } from 'react';
 import { Shipment } from 'types/order';
+import PrintTypography from 'components/base/print-typography/PrintTypography';
 
 interface AddressProps {
   shipment: Shipment;

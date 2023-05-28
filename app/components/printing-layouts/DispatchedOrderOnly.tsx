@@ -1,13 +1,16 @@
-import React, { useEffect, useState, Fragment, useMemo, useCallback } from 'react';
-import { remote } from 'electron';
+import React, { useEffect, useState, Fragment, useMemo } from 'react';
 import { makeStyles } from '@material-ui/styles';
 import { OrderData, PrinterData } from 'types/order';
-import { api } from 'services/api';
-import PrintTypography from 'components/print-typography/PrintTypography';
 import { Theme } from '@material-ui/core';
 import { useSelector } from 'store/selector';
-import Complements from './Complements';
-import Address from './Address';
+import PrintTypography from '../base/print-typography/PrintTypography';
+import Header from './shared-parts/Header';
+import Address from './shared-parts/Address';
+import Additional from './shared-parts/Additional';
+import Ingredients from './shared-parts/Ingredients';
+import ComplementCategories from './shared-parts/ComplementCategories';
+import { useSetOrderPrinted } from 'hooks/useSetOrderPrinted';
+import { usePrint } from 'hooks/usePrint';
 
 interface UseStylesProps {
   fontSize: number;
@@ -18,6 +21,7 @@ interface UseStylesProps {
 const useStyles = makeStyles<Theme, UseStylesProps>({
   container: props => ({
     maxWidth: `${props.maxWidth}mm`,
+    width: '100%',
     minHeight: 300,
     padding: 15,
     fontSize: props.fontSize,
@@ -28,7 +32,7 @@ const useStyles = makeStyles<Theme, UseStylesProps>({
         backgroundColor: 'transparent',
         border: 'none',
         padding: props.noMargin ? '0 0 0 0' : '0 0 0 10px',
-        marginRight: 40,
+        marginRight: 0,
       },
     },
   }),
@@ -64,7 +68,7 @@ const useStyles = makeStyles<Theme, UseStylesProps>({
   },
   customerData: {
     display: 'grid',
-    gridTemplateColumns: '60px 1fr',
+    gridTemplateColumns: '75px 1fr',
     marginBottom: 2,
     columnGap: 7,
   },
@@ -100,19 +104,19 @@ const useStyles = makeStyles<Theme, UseStylesProps>({
     marginRight: 6,
   },
   additionalInfoContainer: {
-    display: 'flex',
+    // display: 'flex',
     flexWrap: 'wrap',
   },
 });
 
-interface PrintProps {
+interface DispatchedOrderOnlyProps {
   handleClose(): void;
-  order: OrderData;
+  data: OrderData;
 }
 
-const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
+const DispatchedOrderOnly: React.FC<DispatchedOrderOnlyProps> = ({ handleClose, data }) => {
   const restaurant = useSelector(state => state.restaurant);
-
+  const order = useMemo(() => JSON.parse(JSON.stringify(data)), [data]);
   const classes = useStyles({
     fontSize: restaurant?.printer_settings?.font_size || 14,
     noMargin: !!restaurant?.printer_settings?.no_margin,
@@ -121,47 +125,20 @@ const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
   const [printers, setPrinters] = useState<PrinterData[]>([]);
   const [toPrint, setToPrint] = useState<PrinterData[]>([]);
   const [printedQuantity, setPrintedQuantity] = useState(0);
-
+  const { setOrderAsPrinted } = useSetOrderPrinted(handleClose, order.id);
+  const { print } = usePrint();
   const copies = useMemo(() => {
     return restaurant?.printer_settings.shipment_template_copies || 1;
   }, [restaurant]);
 
-  const print = useCallback((deviceName?: string): Promise<boolean> => {
-    return new Promise((resolve, reject) => {
-      const [win] = remote.BrowserWindow.getAllWindows();
-
-      if (!win) {
-        reject(Error('Browser window not found'));
-      }
-
-      win.webContents.print(
-        {
-          deviceName: deviceName || undefined,
-          color: false,
-          collate: false,
-          copies: 1,
-          silent: true,
-          margins: {
-            marginType: 'none',
-          },
-        },
-        (success, reason) => {
-          if (success) {
-            resolve(true);
-            return;
-          }
-
-          reject(reason);
-        },
-      );
-    });
-  }, []);
-
   // close if there is not printer in product
   useEffect(() => {
     const check = order.products.some(product => product.printer);
-    if (!check) handleClose();
-  }, [handleClose, order]);
+
+    if (!check) {
+      setOrderAsPrinted();
+    }
+  }, [setOrderAsPrinted, order]);
 
   // get product printers
   useEffect(() => {
@@ -190,30 +167,19 @@ const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
   }, [order]);
 
   useEffect(() => {
-    async function setPrinted() {
-      try {
-        await api.post(`/orders/printed`, { order_id: order.id });
-        console.log(`Alterado situação do pedido ${order.id}`);
-        handleClose();
-      } catch (err) {
-        console.log(err);
-        handleClose();
-      }
-    }
-
     if (printers.length > 0) {
       const tp = printers.find(p => !p.printed);
 
       // close if all order products had been printed
       if (!tp) {
         const check = printers.every(p => p.printed);
-        if (check) setPrinted();
+        if (check) setOrderAsPrinted();
         return;
       }
 
       setToPrint([tp]);
     }
-  }, [printers, handleClose, order]);
+  }, [printers, setOrderAsPrinted, order]);
 
   // print
   useEffect(() => {
@@ -246,32 +212,14 @@ const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
             handleClose();
           });
       });
-  }, [toPrint, handleClose, printedQuantity, copies, print]);
+  }, [toPrint, handleClose, printedQuantity, copies]);
 
   return (
     <>
       {toPrint.length > 0 &&
         toPrint.map(printer => (
           <div key={printer.id} className={classes.container}>
-            <PrintTypography fontSize={1.2} bold gutterBottom>
-              PEDIDO {order.formattedSequence}
-            </PrintTypography>
-            <PrintTypography gutterBottom>{order.formattedDate}</PrintTypography>
-            {order.shipment.shipment_method === 'customer_collect' && !order.shipment.scheduled_at && (
-              <PrintTypography gutterBottom bold>
-                **Cliente retirará**
-              </PrintTypography>
-            )}
-
-            {order.shipment.scheduled_at && (
-              <PrintTypography gutterBottom bold>
-                **Cliente retirará ás {order.shipment.formattedScheduledAt}**
-              </PrintTypography>
-            )}
-
-            {order.board_movement && (
-              <PrintTypography bold>**Mesa {order.board_movement?.board?.number}**</PrintTypography>
-            )}
+            <Header formattedSequence={order.formattedSequence} shipment={order.shipment} />
 
             <div className={classes.customerData}>
               <PrintTypography>Cliente</PrintTypography>
@@ -316,40 +264,13 @@ const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
                         {product.annotation && (
                           <PrintTypography fontSize={0.8}>Obs: {product.annotation}</PrintTypography>
                         )}
+
                         <div className={classes.additionalInfoContainer}>
-                          {product.additional.length > 0 && (
-                            <>
-                              {product.additional.map(additional => (
-                                <PrintTypography display="inline" className={classes.additional} key={additional.id}>
-                                  {`c/ ${additional.amount}x ${additional.name}`}
-                                </PrintTypography>
-                              ))}
-                            </>
-                          )}
-                          {product.ingredients.length > 0 && (
-                            <>
-                              {product.ingredients.map(ingredient => (
-                                <PrintTypography display="inline" className={classes.ingredient} key={ingredient.id}>
-                                  {`s/ ${ingredient.name}`}
-                                </PrintTypography>
-                              ))}
-                            </>
-                          )}
+                          <Additional additional={product.additional} />
+                          <Ingredients ingredients={product.ingredients} />
                         </div>
-                        {product.complement_categories.length > 0 && (
-                          <>
-                            {product.complement_categories.map(category => (
-                              <Fragment key={category.id}>
-                                {category.complements.length > 0 && (
-                                  <div className={classes.complementCategory}>
-                                    <PrintTypography italic>{category.print_name || category.name}</PrintTypography>
-                                    <Complements complementCategory={category} />
-                                  </div>
-                                )}
-                              </Fragment>
-                            ))}
-                          </>
-                        )}
+
+                        <ComplementCategories categories={product.complement_categories} />
                       </td>
                     </tr>
                   ))}
@@ -361,7 +282,9 @@ const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
                 <PrintTypography>Pagamento</PrintTypography>
               </div>
               <div>
-                <PrintTypography>{order.payment_method.method}</PrintTypography>
+                <PrintTypography>
+                  {order.payment_method.mode === 'online' ? `Online` : order.payment_method.method}
+                </PrintTypography>
               </div>
               {order.discount > 0 && (
                 <>
@@ -400,7 +323,7 @@ const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
                 </>
               )}
               <div>
-                <PrintTypography>Total a pagar</PrintTypography>
+                <PrintTypography>{order.payment_method.mode ? 'Total' : 'Total a pagar'}</PrintTypography>
               </div>
               <div>
                 <PrintTypography fontSize={1.2} bold>
@@ -433,4 +356,4 @@ const PrintOnlyShipment: React.FC<PrintProps> = ({ handleClose, order }) => {
   );
 };
 
-export default PrintOnlyShipment;
+export default DispatchedOrderOnly;
