@@ -7,6 +7,7 @@ import BoardBillingTotal from './BoardBillingTotal';
 import BoardBillingDeveloper from './BoardBillingDeveloper';
 import { useSelector } from 'store/selector';
 import { moneyFormat } from 'helpers/NumberFormat';
+import { usePrint } from 'hooks/usePrint';
 
 interface UseStylesProps {
   fontSize: number;
@@ -67,7 +68,7 @@ const BoardBilling: React.FC<BoardBilingProps> = ({ movement, handleClose }) => 
   const formattedTotal = moneyFormat(movement?.total ?? 0);
   const formattedDiscount = moneyFormat(movement?.total ?? 0);
   const [printed, setPrinted] = useState(false);
-
+  const { print } = usePrint();
   const copies = useMemo(() => {
     return restaurant?.printer_settings.shipment_template_copies || 1;
   }, [restaurant]);
@@ -83,8 +84,7 @@ const BoardBilling: React.FC<BoardBilingProps> = ({ movement, handleClose }) => 
       return;
     }
 
-    window.electron
-      .print()
+    print()
       .then(() => {
         setPrintedQuantity(state => state + 1);
       })
@@ -100,7 +100,7 @@ const BoardBilling: React.FC<BoardBilingProps> = ({ movement, handleClose }) => 
         <div className={classes.container}>
           <div className={classes.header}>
             <PrintTypography fontSize={1.2} bold>
-              CONTA - MESA {movement.board.number}
+              CONTA - MESA {movement.board?.number}
             </PrintTypography>
           </div>
 
@@ -108,7 +108,7 @@ const BoardBilling: React.FC<BoardBilingProps> = ({ movement, handleClose }) => 
 
           <div className={classes.customerData}>
             <PrintTypography noWrap>Cliente</PrintTypography>
-            <PrintTypography>{movement.customer.name}</PrintTypography>
+            <PrintTypography>{movement.customer?.name}</PrintTypography>
           </div>
 
           <BoardBillingProducts products={movement?.products ?? []} />
