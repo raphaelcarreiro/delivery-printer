@@ -122,20 +122,23 @@ const ApprovedBoardOrder: React.FC<ApprovedBoardOrderProps> = ({ handleClose, da
   }, [order]);
 
   useEffect(() => {
-    if (printers.length > 0) {
-      const tp = printers.find(p => !p.printed);
+    if (!printers.length) {
+      return;
+    }
 
-      // close if all order products had been printed
-      if (!tp) {
-        const check = printers.every(p => p.printed);
-        if (check) setOrderAsPrinted();
-        return;
-      }
+    const tp = printers.find(printer => !printer.printed);
 
+    if (tp) {
       setToPrint([tp]);
       setPrintedQuantity(0);
+      return;
     }
-  }, [printers, setOrderAsPrinted, order]);
+
+    // close when all order products had been printed
+    setOrderAsPrinted();
+    setPrinters([]);
+    setToPrint([]);
+  }, [printers, setOrderAsPrinted]);
 
   // print
   useEffect(() => {
@@ -144,11 +147,13 @@ const ApprovedBoardOrder: React.FC<ApprovedBoardOrderProps> = ({ handleClose, da
     const [printing] = toPrint;
 
     if (printedQuantity === copies) {
-      setPrinters(oldPrinters =>
-        oldPrinters.map(p => {
-          if (p.id === printing.id) p.printed = true;
-          return p;
-        }),
+      setPrinters(state =>
+        state.map(printer => {
+          if (printer.id === printing.id) {
+            printer.printed = true;
+          }
+          return printer;
+        })
       );
       return;
     }

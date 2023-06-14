@@ -61,17 +61,14 @@ interface BoardBilingProps {
 const BoardBilling: React.FC<BoardBilingProps> = ({ movement, handleClose }) => {
   const restaurant = useSelector(state => state.restaurant);
   const classes = styles({
-    fontSize: restaurant?.printer_settings?.font_size || 14,
+    fontSize: 12,
+    // fontSize: restaurant?.printer_settings?.font_size || 14,
     noMargin: !!restaurant?.printer_settings?.no_margin,
   });
-  const [printedQuantity, setPrintedQuantity] = useState(0);
   const formattedTotal = moneyFormat(movement?.total ?? 0);
   const formattedDiscount = moneyFormat(movement?.total ?? 0);
   const [printed, setPrinted] = useState(false);
   const { print } = usePrint();
-  const copies = useMemo(() => {
-    return restaurant?.printer_settings.shipment_template_copies || 1;
-  }, [restaurant]);
 
   useEffect(() => {
     if (printed) {
@@ -79,20 +76,15 @@ const BoardBilling: React.FC<BoardBilingProps> = ({ movement, handleClose }) => 
       return;
     }
 
-    if (printedQuantity === copies) {
-      setPrinted(true);
-      return;
-    }
-
     print()
       .then(() => {
-        setPrintedQuantity(state => state + 1);
+        setPrinted(true);
       })
       .catch(err => {
         console.error(err);
         handleClose();
       });
-  }, [printed, handleClose, copies, printedQuantity]);
+  }, [printed, handleClose]);
 
   return (
     <>

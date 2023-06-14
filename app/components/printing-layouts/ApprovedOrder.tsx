@@ -126,20 +126,19 @@ const ApprovedOrder: React.FC<ApprovedOrderProps> = ({ handleClose, data }) => {
       return;
     }
 
-    const tp = printers.find(p => !p.printed);
+    const tp = printers.find(printer => !printer.printed);
 
     if (tp) {
       setToPrint([tp]);
       setPrintedQuantity(0);
+      return;
     }
 
-    // close if all order products had been printed
-    const check = printers.every(p => p.printed);
-
-    if (check) {
-      setOrderAsPrinted();
-    }
-  }, [printers, setOrderAsPrinted, order]);
+    // close when all order products had been printed
+    setOrderAsPrinted();
+    setPrinters([]);
+    setToPrint([]);
+  }, [printers, setOrderAsPrinted]);
 
   // print
   useEffect(() => {
@@ -151,12 +150,12 @@ const ApprovedOrder: React.FC<ApprovedOrderProps> = ({ handleClose, data }) => {
 
     if (printedQuantity === copies) {
       setPrinters(state =>
-        state.map(p => {
-          if (p.id === printing.id) {
-            p.printed = true;
+        state.map(printer => {
+          if (printer.id === printing.id) {
+            printer.printed = true;
           }
-          return p;
-        }),
+          return printer;
+        })
       );
       return;
     }

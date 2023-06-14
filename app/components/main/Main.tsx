@@ -32,10 +32,8 @@ const Home: React.FC = () => {
     async function getOrders() {
       try {
         const response = await api.get('/orders/print/list');
-        if (response.data.length > 0) {
-          const formattedOrders = response.data.map((order: OrderData) => formatOrder(order));
-          setOrders(oldOrders => [...oldOrders, ...formattedOrders]);
-        }
+        const formattedOrders = response.data.map((order: OrderData) => formatOrder(order));
+        setOrders(state => (state.length > 0 ? state : formattedOrders));
       } catch (err) {
         console.log(err);
       }
