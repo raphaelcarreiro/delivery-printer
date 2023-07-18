@@ -97,28 +97,36 @@ const ApprovedOrder: React.FC<ApprovedOrderProps> = ({ handleClose, data }) => {
 
   // get product printers
   useEffect(() => {
-    if (order) {
-      let productPrinters: PrinterData[] = [];
-      order.products.forEach(product => {
-        if (product.printer) {
-          if (!productPrinters.some(printer => printer.id === product.printer.id))
-            productPrinters.push(product.printer);
-        }
-      });
-
-      productPrinters = productPrinters.map(_printer => {
-        _printer.order = {
-          ...order,
-          products: order.products.filter(product => {
-            return product.printer && product.printer.id === _printer.id;
-          }),
-        };
-        _printer.printed = false;
-        return _printer;
-      });
-
-      setPrinters(productPrinters);
+    if (!order) {
+      return;
     }
+
+    let productPrinters: PrinterData[] = [];
+
+    order.products.forEach(product => {
+      if (!product.printer) {
+        return;
+      }
+
+      if (!productPrinters.some(printer => printer.id === product.printer.id)) {
+        productPrinters.push(product.printer);
+      }
+    });
+
+    productPrinters = productPrinters.map(printer => {
+      printer.order = {
+        ...order,
+        products: order.products.filter(product => {
+          return product.printer && product.printer.id === printer.id;
+        }),
+      };
+
+      printer.printed = false;
+
+      return printer;
+    });
+
+    setPrinters(productPrinters);
   }, [order]);
 
   useEffect(() => {
@@ -155,7 +163,7 @@ const ApprovedOrder: React.FC<ApprovedOrderProps> = ({ handleClose, data }) => {
             printer.printed = true;
           }
           return printer;
-        })
+        }),
       );
       return;
     }

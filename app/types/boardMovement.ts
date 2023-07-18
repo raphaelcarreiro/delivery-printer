@@ -15,4 +15,5 @@ export interface BoardMovement {
   board_number: string;
   customerName: string;
   board?: Board;
+  delivery_location?: string;
 }

@@ -127,6 +127,7 @@ const DispatchedOrderOnly: React.FC<DispatchedOrderOnlyProps> = ({ handleClose, 
   const [printedQuantity, setPrintedQuantity] = useState(0);
   const { setOrderAsPrinted } = useSetOrderPrinted(handleClose, order.id);
   const { print } = usePrint();
+
   const copies = useMemo(() => {
     return restaurant?.printer_settings.shipment_template_copies || 1;
   }, [restaurant]);
@@ -167,19 +168,23 @@ const DispatchedOrderOnly: React.FC<DispatchedOrderOnlyProps> = ({ handleClose, 
   }, [order]);
 
   useEffect(() => {
-    if (printers.length > 0) {
-      const tp = printers.find(p => !p.printed);
-
-      // close if all order products had been printed
-      if (!tp) {
-        const check = printers.every(p => p.printed);
-        if (check) setOrderAsPrinted();
-        return;
-      }
-
-      setToPrint([tp]);
+    if (!printers.length) {
+      return;
     }
-  }, [printers, setOrderAsPrinted, order]);
+
+    const tp = printers.find(printer => !printer.printed);
+
+    if (tp) {
+      setToPrint([tp]);
+      setPrintedQuantity(0);
+      return;
+    }
+
+    // close when all order products had been printed
+    setOrderAsPrinted();
+    setPrinters([]);
+    setToPrint([]);
+  }, [printers, setOrderAsPrinted]);
 
   // print
   useEffect(() => {
@@ -188,10 +193,12 @@ const DispatchedOrderOnly: React.FC<DispatchedOrderOnlyProps> = ({ handleClose, 
     const [printing] = toPrint;
 
     if (printedQuantity === copies) {
-      setPrinters(oldPrinters =>
-        oldPrinters.map(p => {
-          if (p.id === printing.id) p.printed = true;
-          return p;
+      setPrinters(state =>
+        state.map(printer => {
+          if (printer.id === printing.id) {
+            printer.printed = true;
+          }
+          return printer;
         }),
       );
       return;

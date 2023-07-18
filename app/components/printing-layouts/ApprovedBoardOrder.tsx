@@ -70,7 +70,7 @@ interface ApprovedBoardOrderProps {
 
 const ApprovedBoardOrder: React.FC<ApprovedBoardOrderProps> = ({ handleClose, data }) => {
   const restaurant = useSelector(state => state.restaurant);
-  const order = useMemo(() => JSON.parse(JSON.stringify(data)), [data]);
+  const order = useMemo(() => JSON.parse(JSON.stringify(data)) as OrderData, [data]);
   const classes = useStyles({
     fontSize: restaurant?.printer_settings?.font_size || 14,
     noMargin: !!restaurant?.printer_settings?.no_margin,
@@ -153,7 +153,7 @@ const ApprovedBoardOrder: React.FC<ApprovedBoardOrderProps> = ({ handleClose, da
             printer.printed = true;
           }
           return printer;
-        })
+        }),
       );
       return;
     }
@@ -183,6 +183,10 @@ const ApprovedBoardOrder: React.FC<ApprovedBoardOrderProps> = ({ handleClose, da
             <div className={classes.header}>
               <PrintTypography fontSize={1.2} bold>
                 MESA {order.board_movement?.board?.number}
+              </PrintTypography>
+
+              <PrintTypography fontSize={1.2} bold>
+                {order.board_movement?.delivery_location}
               </PrintTypography>
             </div>
 

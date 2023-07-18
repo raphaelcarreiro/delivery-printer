@@ -26,8 +26,6 @@ const Home: React.FC = () => {
   const [boardMovement, setBoardMovement] = useState<BoardControlMovement | null>(null);
   const [socket, wsConnected] = useSocket(setOrders, setShipment, setBoardMovement);
 
-  console.log(orders);
-
   useEffect(() => {
     async function getOrders() {
       try {
