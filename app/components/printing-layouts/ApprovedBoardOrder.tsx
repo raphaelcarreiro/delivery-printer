@@ -180,15 +180,23 @@ const ApprovedBoardOrder: React.FC<ApprovedBoardOrderProps> = ({ handleClose, da
       {toPrint.length > 0 &&
         toPrint.map(printer => (
           <div className={classes.container} key={printer.id}>
-            <div className={classes.header}>
-              <PrintTypography fontSize={1.2} bold>
-                MESA {order.board_movement?.board?.number}
-              </PrintTypography>
+            {order.board_movement?.delivery_location ? (
+              <div className={classes.header}>
+                <PrintTypography fontSize={1.2} bold>
+                  COMANDA {order.board_movement?.board?.number}
+                </PrintTypography>
 
-              <PrintTypography fontSize={1.2} bold>
-                {order.board_movement?.delivery_location}
-              </PrintTypography>
-            </div>
+                <PrintTypography fontSize={1.2} bold>
+                  {order.board_movement?.delivery_location}
+                </PrintTypography>
+              </div>
+            ) : (
+              <div className={classes.header}>
+                <PrintTypography fontSize={1.2} bold>
+                  MESA {order.board_movement?.board?.number}
+                </PrintTypography>
+              </div>
+            )}
 
             <PrintTypography bold gutterBottom>
               PEDIDO {order.formattedSequence}
