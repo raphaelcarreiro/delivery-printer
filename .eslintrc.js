@@ -29,6 +29,7 @@ module.exports = {
     camelcase: 'off',
     '@typescript-eslint/no-var-requires': 'off',
     'node/no-path-concat': 'off',
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
   },
   parserOptions: {
     ecmaVersion: 2020,

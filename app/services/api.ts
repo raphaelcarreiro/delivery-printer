@@ -1,45 +1,26 @@
 import axios, { CancelTokenSource } from 'axios';
 import constants from 'constants/constants';
-import { history } from './history';
+import { apiErrorInterceptor } from './apiErrorInterceptor';
 
 const api = axios.create({
   baseURL: constants.BASE_URL,
+  withCredentials: true,
 });
 
 api.interceptors.request.use(
   config => {
-    const token = localStorage.getItem('token');
-
     if (config.headers) {
       config.headers.App = 'admin';
     }
 
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
     return config;
   },
-  err => {
-    return Promise.reject(err);
-  },
+  err => Promise.reject(err),
 );
 
 api.interceptors.response.use(
-  config => {
-    return config;
-  },
-  err => {
-    const token = localStorage.getItem('token');
-
-    if (token && err?.response?.status === 401) {
-      localStorage.removeItem('token');
-      history.push('/login');
-      return;
-    }
-
-    return Promise.reject(err);
-  },
+  response => response,
+  error => apiErrorInterceptor(error),
 );
 
 export function getCancelTokenSource(): CancelTokenSource {

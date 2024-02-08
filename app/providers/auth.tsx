@@ -1,19 +1,19 @@
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { setRestaurant } from 'store/modules/restaurant/actions';
 import { setUser } from 'store/modules/user/actions';
-import { api } from 'services/api';
-import jwt from 'jsonwebtoken';
-import constants from 'constants/constants';
 import { User } from 'types/user';
+import { api } from 'services/api';
+import { AxiosError } from 'axios';
+import { Restaurant } from 'types/restaurant';
 
 interface AuthContextData {
-  login(email: string, password: string): Promise<boolean>;
-  logout(): Promise<boolean>;
-  isAuthenticated: boolean;
+  login(email: string, password: string): Promise<void>;
+  logout(): Promise<void>;
+  isAuthenticated(): boolean;
   checkEmail(email: string): Promise<User>;
-  checkAuth(): boolean;
   loading: boolean;
+  me(): Promise<void>;
 }
 
 const AuthContext = React.createContext({} as AuthContextData);
@@ -23,115 +23,85 @@ export function useAuth(): AuthContextData {
   return context;
 }
 
-const AuthProvider: React.FC = ({ children }) => {
+interface AuthProviderProps {
+  children: ReactNode;
+}
+
+const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const dispatch = useDispatch();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [authenticated, setAuthenticated] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      const payload: any = jwt.decode(token);
-
-      if (payload) setIsAuthenticated(true);
-
-      setLoading(true);
-      api
-        .get('/users/current')
-        .then(response => {
-          dispatch(setRestaurant(response.data.restaurant));
-          dispatch(setUser(response.data));
-        })
-        .catch(err => console.error(err))
-        .finally(() => {
-          setLoading(false);
-        });
-    }
+    setLoading(true);
+    api
+      .get('/users/me')
+      .then(response => {
+        dispatch(setRestaurant(response.data.restaurant));
+        dispatch(setUser(response.data));
+      })
+      .catch(err => console.error(err))
+      .finally(() => setLoading(false));
   }, [dispatch]);
 
   const login = useCallback(
-    async (email: string, password: string): Promise<boolean> => {
-      return new Promise((resolve, reject) => {
-        api
-          .post('/login', { email, password })
-          .then(_response => {
-            const response = _response.data.data;
-            localStorage.setItem('token', response.token);
-            dispatch(setRestaurant(response.restaurant));
-            dispatch(setUser(response.user));
-            resolve(true);
-          })
-          .catch(err => {
-            if (err.response) {
-              if (err.response.status === 401) reject(new Error('Usuário ou senha incorretos'));
-            } else reject(new Error(err.message));
-          });
-      });
+    async (email: string, password: string): Promise<void> => {
+      try {
+        const response = await api.post('/login', {
+          email,
+          password,
+        });
+
+        dispatch(setRestaurant(response.data.data.restaurant));
+        dispatch(setUser(response.data.data.user));
+        setAuthenticated(true);
+      } catch (err) {
+        if (err instanceof AxiosError && err.response?.status === 401) {
+          throw new Error('Usuário ou senha incorretos');
+        }
+
+        throw new Error('Não foi possível fazer o login');
+      }
     },
     [dispatch],
   );
 
-  const checkEmail = useCallback((email: string): Promise<User> => {
-    return new Promise((resolve, reject) => {
-      api
-        .get(`/user/show/${email}`)
-        .then(response => {
-          resolve(response.data.data);
-        })
-        .catch(err => {
-          if (err.response) {
-            if (err.response.status === 401) reject(new Error('E-mail não encontrado'));
-          } else reject(new Error(err.message));
-        });
-    });
+  const checkEmail = useCallback(async (email: string): Promise<User> => {
+    try {
+      const response = await api.get(`/user/show/${email}`);
+      return response.data.data;
+    } catch (err) {
+      if (err instanceof AxiosError && err.response?.status === 401) {
+        throw new Error('E-mail não encontrado');
+      }
+
+      throw err;
+    }
   }, []);
 
-  const logout = useCallback((): Promise<boolean> => {
-    return new Promise((resolve, reject) => {
-      api
-        .post('/logout')
-        .then(() => {
-          localStorage.removeItem('token');
-          dispatch(setRestaurant(null));
-          resolve(true);
-        })
-        .catch(err => {
-          reject(new Error(err));
-        });
-    });
+  const logout = useCallback(async (): Promise<void> => {
+    await api.post('/logout');
+    setAuthenticated(false);
+    dispatch(setRestaurant({} as Restaurant));
   }, [dispatch]);
 
-  const checkAuth = useCallback((): boolean => {
-    const token = localStorage.getItem('token');
-    const secret: jwt.Secret = constants.TOKEN;
+  const isAuthenticated = useCallback((): boolean => {
+    return authenticated;
+  }, [authenticated]);
 
-    if (token) {
-      try {
-        jwt.verify(token, secret, {
-          ignoreNotBefore: true,
-        });
-
-        return true;
-      } catch (e) {
-        console.log(e);
-        localStorage.removeItem('h2i@token');
-        setIsAuthenticated(false);
-        dispatch(setUser({} as User));
-      }
-    }
-
-    return false;
-  }, [dispatch]);
+  const me = useCallback(async () => {
+    await api.get('/users/me');
+  }, []);
 
   return (
     <AuthContext.Provider
       value={{
         login,
         logout,
-        loading,
         isAuthenticated,
         checkEmail,
-        checkAuth,
+        loading,
+        me,
       }}
     >
       {children}

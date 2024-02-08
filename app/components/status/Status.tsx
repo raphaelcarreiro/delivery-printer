@@ -36,12 +36,13 @@ const useStyles = makeStyles<Theme, UseStylesProps>(theme => ({
     alignItems: 'center',
   },
   logo: props => ({
-    width: 100,
-    height: 'auto',
+    width: 150,
+    height: 150,
+    marginBottom: 20,
     border: `2px solid ${props.isConnected ? theme.palette.success.main : theme.palette.error.main}`,
     borderRadius: '50%',
     padding: 5,
-    marginRight: 10,
+    marginRight: 20,
   }),
   avatar: {
     width: 60,
@@ -118,7 +119,7 @@ const Status: React.FC<StatusProps> = ({ wsConnected, handleLogout }) => {
         </div>
       )}
       <div className={classes.version}>
-        <Typography color="textSecondary">SGrande Delivery Printer - v{packageJson.version} - ia32</Typography>
+        <Typography color="textSecondary">sgrande delivery printer - v{packageJson.version} - ia32</Typography>
       </div>
     </div>
   );

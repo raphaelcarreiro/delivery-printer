@@ -12,6 +12,8 @@ const socket: Socket = io(constants.WS_BASE_URL);
 
 type UseSocket = [Socket, boolean];
 
+let timer;
+
 export function useSocket(
   setOrders: Dispatch<SetStateAction<OrderData[]>>,
   setShipment: Dispatch<SetStateAction<OrderData | null>>,
@@ -33,17 +35,33 @@ export function useSocket(
 
     socket.on('stored', (order: OrderData) => {
       const formattedOrder = formatOrder(order);
-      setOrders(oldOrders => [...oldOrders, formattedOrder]);
+
+      setOrders(state => {
+        const exist = state.some(item => item.id === order.id);
+
+        if (exist) {
+          return state;
+        }
+
+        return [...state, formattedOrder];
+      });
     });
 
     socket.on('printOrder', (order: OrderData) => {
       const formattedOrder = formatOrder(order);
-      setOrders(oldOrders => [...oldOrders, formattedOrder]);
+
+      setOrders(state => {
+        const exist = state.some(item => item.id === order.id);
+
+        if (exist) {
+          return state;
+        }
+
+        return [...state, formattedOrder];
+      });
     });
 
     socket.on('print_board_billing', (movement: BoardControlMovement) => {
-      console.log(movement);
-
       setBoardMovement(movement);
     });
 
@@ -61,7 +79,7 @@ export function useSocket(
   }, [restaurant, dispatch, formatOrder, setOrders, setBoardMovement]);
 
   useEffect(() => {
-    if (!restaurant?.configs.print_only_shipment) {
+    if (!restaurant?.configs?.print_only_shipment) {
       socket.on('printShipment', (order: OrderData) => {
         const formattedOrder = formatOrder(order);
         setShipment(formattedOrder);
@@ -70,7 +88,16 @@ export function useSocket(
 
     if (restaurant && connected) {
       socket.emit('register', restaurant.id);
+      socket.emit('printer_ping', restaurant.id);
+
+      timer = setInterval(() => {
+        socket.emit('printer_ping', restaurant.id);
+      }, 30000);
     }
+
+    return () => {
+      clearTimeout(timer);
+    };
   }, [connected, restaurant, setShipment, formatOrder]);
 
   return [socket, connected];
