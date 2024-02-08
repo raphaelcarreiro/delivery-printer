@@ -1,7 +1,7 @@
 {
   "name": "delivery-printer",
   "productName": "delivery-printer",
-  "version": "1.5.3",
+  "version": "1.5.4",
   "description": "Aplicação para impressão automática de pedidos",
   "engines": {
     "node": "13.14.0"
